@@ -5,8 +5,6 @@ const { Client, Collection, Intents } = require('discord.js');
 const client = new Client(
     { intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] }
 );
-//const mongoose = require('mongoose');
-
 
 
 //creat a .commands to store all commands
@@ -21,14 +19,7 @@ for (const file of commandFiles) {
 	// With the key as the command name and the value as the exported module
 	client.commands.set(command.data.name, command);
 }
-/*
-// Notify progress
-client.on('ready', async () => {
-    await mongoose.connect(process.env.MONGO_URI, {
-        keepAlive: true
-    })
-})
-*/
+
 // TODO: Function to check if user exists in db and add user to db  
 
 //command handler: create a file for new commands and add it to 'deploy-commands.js' 
