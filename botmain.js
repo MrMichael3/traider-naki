@@ -5,13 +5,23 @@ const { Client, Collection, Intents } = require('discord.js');
 const client = new Client(
     { intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] }
 );
-
-
+async function haha() {
+	const haha = await User.exists({discord_id: 12323});
+	if(haha){
+		//console.log(`check haha: ${haha}`);
+	}
+	else{
+		//console.log("doesnt exists!")
+	}
+	
+}
+const User = require('./User')
+haha();
 //creat a .commands to store all commands
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));
-//store all commands to client.commands
+//store all commands to client.commands<
 for (const file of commandFiles) {
 	const filePath = path.join(commandsPath, file);
 	const command = require(filePath);
@@ -22,7 +32,7 @@ for (const file of commandFiles) {
 
 // TODO: Function to check if user exists in db and add user to db  
 
-//command handler: create a file for new commands and add it to 'deploy-commands.js' 
+//command handler: create a file for new commands and run 'deploy-commands.js' 
 client.on('interactionCreate', async interaction => {
     if (!interaction.isCommand()) return;
 
@@ -51,7 +61,29 @@ for (const file of eventFiles) {
 		client.on(event.name, (...args) => event.execute(...args));
 	}
 }
+run()
+async function run(){
+	try{
+		await User.create({ discord_id: "third_usjjer", username: "Hans", status: "idle"})
+		const user = await User.findOne({discord_id: "third_user"})
+		//console.log(user)
+
+		
+	}
+	catch (e) {
+		console.log(e.message)
+	}
+}
+createUser("first_user", "hans")
+async function createUser(d_id, name){
+	//create a new user
+	if (await User.exists({discord_id: d_id})){return;}
+	await User.create({
+		discord_id: d_id,
+		username: name
+	})
 
 
+}
 // Authenticate
 client.login(process.env.DISCORD_TOKEN)

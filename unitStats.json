@@ -1,0 +1,82 @@
+{
+    "starterUnits":[
+        {
+            "id": 1,
+            "name": "Druid Naki",
+            "description": "The Druid Naki is a balanced unit, who can deal out quite a bit. Not the strongest against wild creatures, but a danger for all Spirits.",
+            "health": 100,
+            "minAttack": 10,
+            "maxAttack": 15,
+            "strongAgainst": [3,4],
+            "weakAgainst": [2,8]
+        },
+        {
+            "id": 2,
+            "name": "Guard Naki",
+            "description": "The Guard Naki has massive power, if he can control it. He is especially strong against Druids and Elder Spirits, but secretley fears Nyxi and Ranax",
+            "health": 50,
+            "minAttack": 18,
+            "maxAttack": 32,
+            "strongAgainst": [1,4],
+            "weakAgainst": [5,7]
+        },
+        {
+            "id": 3,
+            "name": "Forest Spirit",
+            "description": "The Forest Spirit is a harmonius unit that learned to beat wild creatures quiet well. He tries to avoid Nakis and prefer staying in the wild.",
+            "health": 125,
+            "minAttack": 8,
+            "maxAttack": 12,
+            "strongAgainst": [5,8],
+            "weakAgainst": [1,7]
+        },
+        {
+            "id": 4,
+            "name": "Elder Spirit",
+            "description": "The Elder Spirit can't be upset so quickly. But with his patient fighting techniques he can even beat the most dangerous wild creatures.",
+            "health": 250,
+            "minAttack": 4,
+            "maxAttack": 6,
+            "strongAgainst": [7,8],
+            "weakAgainst": [1,2]
+        }
+    ],
+    "wildCreatures":[
+        {
+            "id": 5,
+            "name": "Nyxi",
+            "health": 75,
+            "minAttack": 2,
+            "maxAttack": 4,
+            "strongAgainst": [2],
+            "weakAgainst": [3]
+        },
+        {
+            "id": 6,
+            "name": "Pangoan",
+            "health": 120,
+            "minAttack": 8,
+            "maxAttack": 10,
+            "strongAgainst": [],
+            "weakAgainst": []
+        },
+        {
+            "id": 7,
+            "name": "Ranax",
+            "health": 60,
+            "minAttack": 15,
+            "maxAttack": 35,
+            "strongAgainst": [2,3],
+            "weakAgainst": [4]
+        },
+        {
+            "id": 8,
+            "name": "Athlas",
+            "health": 400,
+            "minAttack": 22,
+            "maxAttack": 28,
+            "strongAgainst": [1],
+            "weakAgainst": [3,4]
+        }
+    ]
+}
