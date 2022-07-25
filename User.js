@@ -25,7 +25,7 @@ const userSchema = new mongoose.Schema({
     },
     status_time: {
         type: Date,
-        default: () => Date.now()
+        default: () => (Date.now() - (3600 * 1000 * 24))
     },
     inventory: {type: Array, default: []},
     soulstones: {
@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema({
     mining: {
         last_mining: {
             type: Date,
-            default: ()=> Date.now()
+            default: ()=> (Date.now() - (3600 * 1000 * 24))
         },
         streak: {
             type: Number,
