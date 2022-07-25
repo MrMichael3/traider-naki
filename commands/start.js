@@ -173,8 +173,6 @@ module.exports = {
                         }
                         const addedNewUser = await handleNewUser(newUser);
                         if(!addedNewUser) return console.log(`User ${newUser.id} couldn't be added!`);
-                        console.log("New User added to DB!!!");
-
 
                     }
                 });

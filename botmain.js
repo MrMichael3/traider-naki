@@ -31,7 +31,6 @@ client.on('interactionCreate', async interaction => {
     const command = client.commands.get(interaction.commandName);
 	if (!command) return;
 	//check if user exists already (exclude commands where no user is needed)
-	console.log(`show command: ${JSON.stringify(command)}`);
 	if (command.data.name != "start" && !await User.findOne({discord_id: interaction.user.id}).exec()){
 		await interaction.reply({content: "You have not selected your origin yet! Type '/start' to start your adventure in Expelsia."});
 		return;
@@ -42,13 +41,6 @@ client.on('interactionCreate', async interaction => {
 			console.error(error);
 			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
 		}
-	
-	/*else if (interaction.isButton()){
-		buttonIds = ["druidNaki", "guardNaki", "forestSpirit", "ElderSpirit"];
-		//if (interaction.)
-		console.log(`button interaction: ${interaction}`);
-		interaction.reply({content: `${interaction.user.tag} clicked me`});
-	}*/
 });
 
 //event handler
