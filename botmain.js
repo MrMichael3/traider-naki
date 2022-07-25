@@ -5,18 +5,11 @@ const { Client, Collection, Intents } = require('discord.js');
 const client = new Client(
     { intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] }
 );
-
 const User = require('./User')
-async function haha() {
-	const haha = await User.exists({discord_id: 12323});
-	if(haha){
-		//console.log(`check haha: ${haha}`);
-	}
-	else{
-		//console.log("doesnt exists!")
-	}
-	
-}haha();
+const deleteUserController = require(`./controller/deleteUserController.js`);
+
+deleteUserController("312616992098091010"); //delete user Ramsus for test purpose
+
 //creat a .commands to store all commands
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');

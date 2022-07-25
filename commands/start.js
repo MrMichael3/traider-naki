@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const User = require('./User');
+const User = require('./../User');
+const mongoose = require('mongoose');
 const {MessageEmbed, MessageActionRow, MessageButton, ButtonInteraction } = require('discord.js');
 const unitData = require('./../unitStats.json');
 const emojis = require('./../emojis.json');
@@ -9,13 +10,6 @@ const forestSpirit = unitData.starterUnits.find(x => x.id === 3);
 const elderSpirit = unitData.starterUnits.find(x => x.id === 4);
 const handleNewUser = require('./../registerController');
 
-
-//sleep function
-function sleep(ms) {
-    return new Promise((resolve) => {
-      setTimeout(resolve, ms);
-    });
-  }
 
 //create embed unit descriptions
 function createEmbeds(interaction){
@@ -105,7 +99,7 @@ function createEmbeds(interaction){
 
 }
 async function checkIfUserExists(id){
-    return //await User.exists({discord_id: id});
+    return await User.findOne({discord_id: id}).exec();
 }
 module.exports = {
 	data: new SlashCommandBuilder()
@@ -113,8 +107,8 @@ module.exports = {
 		.setDescription('the beginning of your journey in Expelsia'),
         async execute(interaction) {
             const embedsList = createEmbeds(interaction);
-            const haha = await checkIfUserExists(interaction.user.id);
-            if (haha){
+            const userExists = await checkIfUserExists(interaction.user.id);
+            if (userExists){
             await interaction.reply({
                 content:`You already joined Expelsia! Try '/stats' to see your stats. If you want to start a new journey type '/new-game' (you will lose all your progress and Soulstones!)`,
                 ephemeral: true})
