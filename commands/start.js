@@ -1,12 +1,21 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const User = require('./User');
-const {MessageEmbed } = require('discord.js');
+const {MessageEmbed, MessageActionRow, MessageButton, ButtonInteraction } = require('discord.js');
 const unitData = require('./../unitStats.json');
 const emojis = require('./../emojis.json');
 const druidNaki = unitData.starterUnits.find(x => x.id === 1);
 const guardNaki = unitData.starterUnits.find(x => x.id === 2);
 const forestSpirit = unitData.starterUnits.find(x => x.id === 3);
 const elderSpirit = unitData.starterUnits.find(x => x.id === 4);
+const handleNewUser = require('./../registerController');
+
+
+//sleep function
+function sleep(ms) {
+    return new Promise((resolve) => {
+      setTimeout(resolve, ms);
+    });
+  }
 
 //create embed unit descriptions
 function createEmbeds(interaction){
@@ -104,7 +113,6 @@ module.exports = {
 		.setDescription('the beginning of your journey in Expelsia'),
         async execute(interaction) {
             const embedsList = createEmbeds(interaction);
-            //const emojiList = await interaction.guild.emojis.cache.map(emoji => emoji.toString()).join(" ");
             const haha = await checkIfUserExists(interaction.user.id);
             if (haha){
             await interaction.reply({
@@ -115,7 +123,68 @@ module.exports = {
 		        await interaction.reply({
                     content: `Hello ${interaction.user.tag}\n This is the beginning of your journey in Expelsia! First, chose your origin. You can chose between four units, but chose wisely, as this can't be changed afterwards. Read the information about the units first before you chose. \n In Expelsia you have to stand up to wild creatures as well as to other players.`,
                     ephemeral: true});
-                await interaction.followUp({embeds: embedsList, ephemeral: true})
+                const row = new MessageActionRow()
+                    .addComponents(
+                        new MessageButton()
+                            .setCustomId('druidNaki')
+                            .setLabel('Druid Naki')
+                            .setEmoji(emojis["unitDruidNaki"])
+                            .setStyle('SUCCESS'),
+                    
+                        new MessageButton()
+                            .setCustomId('guardNaki')
+                            .setLabel('Guard Naki')
+                            .setEmoji(emojis["unitGuardNaki"])
+                            .setStyle('SUCCESS'),
+                        new MessageButton()
+                            .setCustomId('forestSpirit')
+                            .setLabel('Forest Spirit')
+                            .setEmoji(emojis["unitForestSpirit"])
+                            .setStyle('SUCCESS'),
+                        new MessageButton()
+                            .setCustomId('elderSpirit')
+                            .setEmoji(emojis["unitElderSpirit"])
+                            .setLabel('Elder Spirit')
+                            .setStyle('SUCCESS'),
+                    );
+                await interaction.followUp({embeds: embedsList, ephemeral: true, components: [row]});
+                
+                //collector for button interaction
+                const filter = (int)=>{
+                    if(int.user.id === interaction.user.id){
+                        return true;
+                    }
+                    return int.reply({content: `You can't use this button!`});
+                };
+                const collector = interaction.channel.createMessageComponentCollector({
+                    filter
+                });
+                collector.on('collect', async i => {
+                    const chosenUnitId = i.customId;
+                    let chosenUnitName = chosenUnitId.replace(/([A-Z])/g, ' $1');
+                    chosenUnitName = chosenUnitName.charAt(0).toUpperCase() + chosenUnitName.slice(1);
+                    let x = "unit" + chosenUnitId.charAt(0).toUpperCase() + chosenUnitId.slice(1);
+                    const chosenUnitEmoji = emojis[x];
+                    const validUnitIds = ["druidNaki", "guardNaki", "forestSpirit", "elderSpirit"];
+                    if(!validUnitIds.includes(chosenUnitId)){
+                        await i.reply({content: `The button interaction is not valid! Try again`, ephemeral: true});
+                    }
+                    else{
+                        await i.update({ content: `${interaction.user.tag} chose ${chosenUnitName} ${chosenUnitEmoji}.`, embeds: [], components: []});
+                        //create db entry
+                        const newUser = {
+                            "id": interaction.user.id,
+                            "tag": interaction.user.tag,
+                            "unit": chosenUnitId
+                        }
+                        const addedNewUser = await handleNewUser(newUser);
+                        if(!addedNewUser) return console.log(`User ${newUser.id} couldn't be added!`);
+                        console.log("New User added to DB!!!");
+
+
+                    }
+                });
+                //collector.on("end", async (ButtonInteraction) =>{})
             }},
 };
 

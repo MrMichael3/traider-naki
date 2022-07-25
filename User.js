@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     },
     unit: {
         unit_type: String,
-        xp: Number,
+        xp: {type: Number, default: 0},
         current_health: Number,
         max_health: Number,
         min_attack: Number,
