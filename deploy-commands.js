@@ -28,3 +28,8 @@ const rest = new REST({ version: '9' }).setToken(process.env.DISCORD_TOKEN);
 		console.error(error);
 	}
 })();
+
+// for global commands
+rest.delete(Routes.applicationCommand(clientId, 'commandId'))
+	.then(() => console.log('Successfully deleted application command'))
+	.catch(console.error);
