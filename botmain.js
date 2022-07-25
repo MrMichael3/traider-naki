@@ -30,6 +30,12 @@ client.on('interactionCreate', async interaction => {
     if (!interaction.isCommand()) return;
     const command = client.commands.get(interaction.commandName);
 	if (!command) return;
+	//check if user exists already (exclude commands where no user is needed)
+	console.log(`show command: ${JSON.stringify(command)}`);
+	if (command.data.name != "start" && !await User.findOne({discord_id: interaction.user.id}).exec()){
+		await interaction.reply({content: "You have not selected your origin yet! Type '/start' to start your adventure in Expelsia."});
+		return;
+	}
 	try {
 		await command.execute(interaction);
 		} catch (error) {
