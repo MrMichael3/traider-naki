@@ -43,7 +43,11 @@ module.exports = {
                     //user got a level up
                     levelUp(getUser);
                 }
+                getUser.unit.xp = 870;
+                await getUser.save();
+                levelUp(getUser);
             }
+            
             else{
                 await interaction.reply({content: "You have mined already today. Come back tomorrow."});
                 return;
