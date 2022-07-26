@@ -10,7 +10,7 @@ const progressbar = require('string-progressbar');
 
 function createEmbeds(user) {
 	const embeds = [];
-	const userName = user.username.slice(0,user.username.indexOf('#'));
+	const userName = user.username.slice(0, user.username.indexOf('#'));
 	var thumbnail = "";
 	var strongAgainst = [];
 	var weakAgainst = [];
@@ -48,10 +48,11 @@ function createEmbeds(user) {
 		.setThumbnail(thumbnail)
 		.setDescription(`*${unitStats.starterUnits.find(x => x.id === unitId).description}* \n ${progressbar.filledBar(maxXp, user.unit.xp)[0]} \n XP: ${user.unit.xp}/${maxXp}`)
 		.addFields(
-			{ name: 'health', value: `${user.unit.current_health}/${user.unit.max_health}${emojis.defensive}`, inline: true },
-			{ name: 'attack', value: `${user.unit.min_attack}-${user.unit.max_attack}${emojis.offensive}`, inline: true },
-			{ name: 'strong against', value: `${findUnitIconsById(strongAgainst)}`, inline: true },
-			{ name: 'weak against', value: `${findUnitIconsById(weakAgainst)}`, inline: true }
+			{ name: 'Health', value: `${user.unit.current_health}/${user.unit.max_health}${emojis.defensive}`, inline: true },
+			{ name: 'Attack', value: `${user.unit.min_attack}-${user.unit.max_attack}${emojis.offensive}`, inline: true },
+			{ name: 'Status', value: `${user.status}`, inline: true },
+			{ name: 'Strong against', value: `${findUnitIconsById(strongAgainst)}`, inline: true },
+			{ name: 'Weak against', value: `${findUnitIconsById(weakAgainst)}`, inline: true }
 		)
 	embeds.push(unitStatsEmbed);
 	return embeds;
