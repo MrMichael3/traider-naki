@@ -68,7 +68,6 @@ module.exports = {
 		var discordUser;
 		if (interaction.options.get('user')) {
 			discordUser = interaction.options.get('user').user;
-			console.log(JSON.stringify(discordUser));
 		}
 		else {
 			discordUser = interaction.user;
