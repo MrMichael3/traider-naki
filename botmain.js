@@ -23,7 +23,6 @@ for (const file of commandFiles) {
 	client.commands.set(command.data.name, command);
 }
 
-// TODO: Function to check if user exists in db and add user to db  
 
 //command handler: create a file for new commands and run 'deploy-commands.js' 
 client.on('interactionCreate', async interaction => {
@@ -31,7 +30,8 @@ client.on('interactionCreate', async interaction => {
 	const command = client.commands.get(interaction.commandName);
 	if (!command) return;
 	//check if user exists already (exclude commands where no user is needed)
-	if (command.data.name != "start" && !await User.findOne({ discord_id: interaction.user.id }).exec()) {
+	const excludedCommands = ["start", "stats", "help"];
+	if (!excludedCommands.includes(command.data.name) && !await User.findOne({ discord_id: interaction.user.id }).exec()) {
 		await interaction.reply({ content: "You have not selected your origin yet! Type '/start' to start your adventure in Expelsia." });
 		return;
 	}

@@ -116,7 +116,7 @@ module.exports = {
         }
         else {
             await interaction.reply({
-                content: `Hello ${interaction.user.tag}\n This is the beginning of your journey in Expelsia! First, chose your origin. You can chose between four units, but chose wisely, as this can't be changed afterwards. Read the information about the units first before you chose. \n In Expelsia you have to stand up to wild creatures as well as to other players.`,
+                content: `Hello <@${interaction.user.id}> \n This is the beginning of your journey in Expelsia! First, chose your origin. You can chose between four units, but chose wisely, as this can't be changed afterwards. Read the information about the units first before you chose. \n In Expelsia you have to stand up to wild creatures as well as to other players.`,
                 ephemeral: true
             });
             const row = new MessageActionRow()
@@ -166,7 +166,7 @@ module.exports = {
                     await i.reply({ content: `The button interaction is not valid! Try again`, ephemeral: true });
                 }
                 else {
-                    await i.update({ content: `${interaction.user.tag} chose ${chosenUnitName} ${chosenUnitEmoji}.`, embeds: [], components: [] });
+                    await i.update({ content: `<@${interaction.user.id}> chose ${chosenUnitName} ${chosenUnitEmoji}.`, embeds: [], components: [] });
                     //create db entry
                     const newUser = {
                         "id": interaction.user.id,
@@ -181,6 +181,6 @@ module.exports = {
             //collector.on("end", async (ButtonInteraction) =>{})
         }
     },
-};
+ findUnitIconsById};
 
-
+//module.exports= findUnitIconsById;

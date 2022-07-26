@@ -20,7 +20,7 @@ function createEmbeds(userBefore, userAfter) {
     const unitStats = new MessageEmbed()
         .setTitle(`Level Up!`)
         .setThumbnail("https://c.tenor.com/VaLGhMfFcecAAAAi/emir-mekan-gi%CC%87f.gif")
-        .setDescription(`**${username}** the ${unitName}`)
+        .setDescription(`<@${userAfter.discord_id}> the ${unitName}`)
         .addFields(
             { name: '**Level**', value: `**${levelBefore} -> ${levelAfter}**` },
             { name: '**Health**', value: `${Math.round(userBefore.max_health)}${emojis.defensive} -> ${Math.round(userAfter.unit.max_health)}${emojis.defensive}` },
@@ -29,7 +29,9 @@ function createEmbeds(userBefore, userAfter) {
     embeds.push(unitStats);
     return embeds;
 }
-
+const xpOfLevel = (lv) => {
+    return (baseXp * Math.pow(multiplier, lv));
+}
 const getUnitLevel = (xp) => {
     //calculate level, each unit has same xp rate, min lv: 1
     if (xp < levelOne) {
@@ -92,4 +94,4 @@ const levelUp = async (user, xpBefore, channel) => {
     await channel.send({ embeds: embedsList });
     return;
 }
-module.exports = { getUnitLevel, levelUp };
+module.exports = { getUnitLevel, levelUp, xpOfLevel };
