@@ -1,5 +1,4 @@
 {
-    
     "divinestone": "<:divinestone:665280897729167390>",
     "soulstone": "<:soulstone:665281033901572117>",
     "controlpoint": "<:controlpoint:665282364620144680>",
@@ -16,15 +15,16 @@
     "unitSpotterNaki": "<:unit_spotter_naki:844332331439226931>",
     "unitTeryx": "<:unit_terxy:844332391454998558>",
     "unitForestSpirit": "<:unit_forest_spirit:844333379776151604>",
-     "treasure": "<:icon_treasure:844342085347704834>",
-     "offensive": "<:icon_offensive:844342389351120916>",
-     "defensive": "<:icon_defensive:844342528736100373>",
-     "movement": "<:icon_movement:844342714396966935>",
-     "unitNyxi": "<:unit_nyxi:844977981868867635>",
-     "unitRanax": "<:unit_ranax:845668865177288744>",
-     "unitDruidNaki": "<:unit_druid_naki:850635829054406686>",
-     "unitTeryxAnimated": "<a:unit_teryx_animated:853263444114407434>",
-     "evolutionCoin": "<:icon_evolution_coin:933444884839415909>",
-     "info": "<:icon_info:933446698519367720>",
-     "lightEssence": "<:light_essence:941131459207495751>"
+    "treasure": "<:icon_treasure:844342085347704834>",
+    "offensive": "<:icon_offensive:844342389351120916>",
+    "defensive": "<:icon_defensive:844342528736100373>",
+    "movement": "<:icon_movement:844342714396966935>",
+    "unitNyxi": "<:unit_nyxi:844977981868867635>",
+    "unitRanax": "<:unit_ranax:845668865177288744>",
+    "unitDruidNaki": "<:unit_druid_naki:850635829054406686>",
+    "unitTeryxAnimated": "<a:unit_teryx_animated:853263444114407434>",
+    "evolutionCoin": "<:icon_evolution_coin:933444884839415909>",
+    "info": "<:icon_info:933446698519367720>",
+    "lightEssence": "<:light_essence:941131459207495751>",
+    "levelUp": "<a:levelup:1001390328873488464>"
 }

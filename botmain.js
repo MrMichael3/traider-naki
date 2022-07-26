@@ -3,7 +3,7 @@ const fs = require('node:fs')
 const path = require('node:path')
 const { Client, Collection, Intents } = require('discord.js');
 const client = new Client(
-    { intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] }
+	{ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] }
 );
 const User = require('./User')
 const deleteUserController = require(`./controller/deleteUserController.js`);
@@ -27,20 +27,20 @@ for (const file of commandFiles) {
 
 //command handler: create a file for new commands and run 'deploy-commands.js' 
 client.on('interactionCreate', async interaction => {
-    if (!interaction.isCommand()) return;
-    const command = client.commands.get(interaction.commandName);
+	if (!interaction.isCommand()) return;
+	const command = client.commands.get(interaction.commandName);
 	if (!command) return;
 	//check if user exists already (exclude commands where no user is needed)
-	if (command.data.name != "start" && !await User.findOne({discord_id: interaction.user.id}).exec()){
-		await interaction.reply({content: "You have not selected your origin yet! Type '/start' to start your adventure in Expelsia."});
+	if (command.data.name != "start" && !await User.findOne({ discord_id: interaction.user.id }).exec()) {
+		await interaction.reply({ content: "You have not selected your origin yet! Type '/start' to start your adventure in Expelsia." });
 		return;
 	}
 	try {
 		await command.execute(interaction);
-		} catch (error) {
-			console.error(error);
-			await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
-		}
+	} catch (error) {
+		console.error(error);
+		await interaction.reply({ content: 'There was an error while executing this command!', ephemeral: true });
+	}
 });
 
 //event handler
