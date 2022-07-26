@@ -6,9 +6,11 @@ const { MessageEmbed } = require('discord.js');
 const emojis = require('./../emojis.json');
 const { getUnitLevel, xpOfLevel } = require('./../controller/unitLevel.js');
 const { findUnitIconsById } = require('./start.js');
+const progressbar = require('string-progressbar');
 
 function createEmbeds(user) {
 	const embeds = [];
+	const userName = user.username.slice(0,user.username.indexOf('#'));
 	var thumbnail = "";
 	var strongAgainst = [];
 	var weakAgainst = [];
@@ -42,9 +44,9 @@ function createEmbeds(user) {
 	strongAgainst = unitStats.starterUnits.find(x => x.id === unitId).strongAgainst;
 	weakAgainst = unitStats.starterUnits.find(x => x.id === unitId).weakAgainst;
 	const unitStatsEmbed = new MessageEmbed()
-		.setTitle(`${unitName} Level ${unitLevel}`)
+		.setTitle(`${userName}, ${unitName} Level ${unitLevel}`)
 		.setThumbnail(thumbnail)
-		.setDescription(`XP: ${user.unit.xp}/${maxXp} \n${unitStats.starterUnits.find(x => x.id === unitId).description}`)
+		.setDescription(`*${unitStats.starterUnits.find(x => x.id === unitId).description}* \n ${progressbar.filledBar(maxXp, user.unit.xp)[0]} \n XP: ${user.unit.xp}/${maxXp}`)
 		.addFields(
 			{ name: 'health', value: `${user.unit.current_health}/${user.unit.max_health}${emojis.defensive}`, inline: true },
 			{ name: 'attack', value: `${user.unit.min_attack}-${user.unit.max_attack}${emojis.offensive}`, inline: true },
