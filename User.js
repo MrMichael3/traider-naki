@@ -16,6 +16,10 @@ const userSchema = new mongoose.Schema({
         xp: { type: Number, default: 0 },
         current_health: Number,
         max_health: Number,
+        last_health_update: {
+            type: Date,
+            default: () => (Date.now())
+        },
         min_attack: Number,
         max_attack: Number
     },
