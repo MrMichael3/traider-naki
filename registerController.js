@@ -2,19 +2,19 @@ const mongoose = require('mongoose');
 const User = require('./User.js');
 const unitStats = require('./unitStats.json');
 
-function getUnitStats(u){
+function getUnitStats(u) {
     var unit = {};
-    switch (u){
+    switch (u) {
         case "druidNaki":
             unit = unitStats.starterUnits.find(obj => obj.id === 1);
             break;
-            case "guardNaki":
+        case "guardNaki":
             unit = unitStats.starterUnits.find(obj => obj.id === 2);
             break;
-            case "forestSpirit":
+        case "forestSpirit":
             unit = unitStats.starterUnits.find(obj => obj.id === 3);
             break;
-            case "elderSpirit":
+        case "elderSpirit":
             unit = unitStats.starterUnits.find(obj => obj.id === 4);
             break;
         default:
@@ -22,16 +22,16 @@ function getUnitStats(u){
     }
     return unit;
 }
-const handleNewUser = async (user) =>{
+const handleNewUser = async (user) => {
     //check if user already exists
-    const duplicate = await User.findOne({discord_id: user.id}).exec();
-    if (duplicate){
+    const duplicate = await User.findOne({ discord_id: user.id }).exec();
+    if (duplicate) {
         console.log(`user ${user.tag} already exists!`);
         return;
     }
     //get initial unit stats
     const unit = getUnitStats(user.unit);
-    try{
+    try {
         //create new user
         const result = await User.create({
             "username": user.tag,
@@ -45,7 +45,7 @@ const handleNewUser = async (user) =>{
             }
         })
         return result;
-    }catch(err){
+    } catch (err) {
         console.log(err);
     }
 }

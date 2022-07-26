@@ -1,5 +1,5 @@
 {
-    "starterUnits":[
+    "starterUnits": [
         {
             "id": 1,
             "name": "Druid Naki",
@@ -7,8 +7,14 @@
             "health": 100,
             "minAttack": 10,
             "maxAttack": 15,
-            "strongAgainst": [3,4],
-            "weakAgainst": [2,8]
+            "strongAgainst": [
+                3,
+                4
+            ],
+            "weakAgainst": [
+                2,
+                8
+            ]
         },
         {
             "id": 2,
@@ -17,8 +23,14 @@
             "health": 50,
             "minAttack": 18,
             "maxAttack": 32,
-            "strongAgainst": [1,4],
-            "weakAgainst": [5,7]
+            "strongAgainst": [
+                1,
+                4
+            ],
+            "weakAgainst": [
+                5,
+                7
+            ]
         },
         {
             "id": 3,
@@ -27,8 +39,14 @@
             "health": 125,
             "minAttack": 8,
             "maxAttack": 12,
-            "strongAgainst": [5,8],
-            "weakAgainst": [1,7]
+            "strongAgainst": [
+                5,
+                8
+            ],
+            "weakAgainst": [
+                1,
+                7
+            ]
         },
         {
             "id": 4,
@@ -37,19 +55,29 @@
             "health": 250,
             "minAttack": 4,
             "maxAttack": 6,
-            "strongAgainst": [7,8],
-            "weakAgainst": [1,2]
+            "strongAgainst": [
+                7,
+                8
+            ],
+            "weakAgainst": [
+                1,
+                2
+            ]
         }
     ],
-    "wildCreatures":[
+    "wildCreatures": [
         {
             "id": 5,
             "name": "Nyxi",
             "health": 75,
             "minAttack": 2,
             "maxAttack": 4,
-            "strongAgainst": [2],
-            "weakAgainst": [3]
+            "strongAgainst": [
+                2
+            ],
+            "weakAgainst": [
+                3
+            ]
         },
         {
             "id": 6,
@@ -66,8 +94,13 @@
             "health": 60,
             "minAttack": 15,
             "maxAttack": 35,
-            "strongAgainst": [2,3],
-            "weakAgainst": [4]
+            "strongAgainst": [
+                2,
+                3
+            ],
+            "weakAgainst": [
+                4
+            ]
         },
         {
             "id": 8,
@@ -75,8 +108,13 @@
             "health": 400,
             "minAttack": 22,
             "maxAttack": 28,
-            "strongAgainst": [1],
-            "weakAgainst": [3,4]
+            "strongAgainst": [
+                1
+            ],
+            "weakAgainst": [
+                3,
+                4
+            ]
         }
     ]
 }

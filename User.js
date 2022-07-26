@@ -13,7 +13,7 @@ const userSchema = new mongoose.Schema({
     },
     unit: {
         unit_type: String,
-        xp: {type: Number, default: 0},
+        xp: { type: Number, default: 0 },
         current_health: Number,
         max_health: Number,
         min_attack: Number,
@@ -27,7 +27,7 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: () => (Date.now() - (3600 * 1000 * 24))
     },
-    inventory: {type: Array, default: []},
+    inventory: { type: Array, default: [] },
     soulstones: {
         type: Number,
         default: 0
@@ -35,20 +35,20 @@ const userSchema = new mongoose.Schema({
     mining: {
         last_mining: {
             type: Date,
-            default: ()=> (Date.now() - (3600 * 1000 * 24))
+            default: () => (Date.now() - (3600 * 1000 * 24))
         },
         streak: {
             type: Number,
             default: 0
         }
     },
-    pvp_battles:[{
+    pvp_battles: [{
         time: Date,
         opponent: String,
         result: String
     }]
 })
-userSchema.methods.sayHi = function (){
-console.log(`Hi, my id is ${this.discord_id}`)
+userSchema.methods.sayHi = function () {
+    console.log(`Hi, my id is ${this.discord_id}`)
 }
 module.exports = mongoose.model("User", userSchema)    
