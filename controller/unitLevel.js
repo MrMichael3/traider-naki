@@ -6,7 +6,7 @@ const emojis = require('./../emojis.json');
 
 const baseXp = 350 //xp for level 0;
 const multiplier = 1.2;
-const levelOne = baseXp * multiplier; //xp needed for first lv up
+const levelOne = baseXp * multiplier - baseXp; //xp needed for first lv up
 const statsMultiplier = 20; //increase health and attack per level
 
 function createEmbeds(userBefore, userAfter) {
@@ -30,14 +30,14 @@ function createEmbeds(userBefore, userAfter) {
     return embeds;
 }
 const xpOfLevel = (lv) => {
-    return (baseXp * Math.pow(multiplier, lv));
+    return (baseXp * Math.pow(multiplier, lv) - baseXp);
 }
 const getUnitLevel = (xp) => {
     //calculate level, each unit has same xp rate, min lv: 1
     if (xp < levelOne) {
         return 1;
     }
-    return (Math.floor(Math.log(xp / baseXp) / Math.log(multiplier)) + 1);
+    return (Math.floor(Math.log((baseXp + xp) / baseXp) / Math.log(multiplier)));
 }
 const levelUp = async (user, xpBefore, channel) => {
     //increase hp and attack by 20% each level
