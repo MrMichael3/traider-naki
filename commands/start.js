@@ -178,7 +178,6 @@ module.exports = {
 
                 }
             });
-            //collector.on("end", async (ButtonInteraction) =>{})
         }
     },
  findUnitIconsById};
