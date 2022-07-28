@@ -55,7 +55,7 @@ const levelUp = async (user, xpBefore, channel) => {
     const previousHealth = user.unit.max_health;
     const previousMinAttack = user.unit.min_attack;
     const previousMaxAttack = user.unit.max_attack;
-    if (lv <= previousLv) {
+    if (lv <= previousLv && xpOfLevel(lv+1)> xp) {
         console.log(`error: ${user.username} lv ${lv} hasn't leveled up!`);
         return;
     }
