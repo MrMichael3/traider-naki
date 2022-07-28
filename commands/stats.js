@@ -19,6 +19,7 @@ function createEmbeds(user) {
 	unitName = unitName.charAt(0).toUpperCase() + unitName.slice(1);
 	const unitLevel = getUnitLevel(user.unit.xp);
 	const maxXp = xpOfLevel(unitLevel + 1);
+	const prevMaxXp = xpOfLevel(Math.max(unitLevel, 1));
 	switch (user.unit.unit_type) {
 		case "druidNaki":
 			unitId = 1;
@@ -46,7 +47,7 @@ function createEmbeds(user) {
 	const unitStatsEmbed = new MessageEmbed()
 		.setTitle(`${userName}, ${unitName} Level ${unitLevel}`)
 		.setThumbnail(thumbnail)
-		.setDescription(`*${unitStats.starterUnits.find(x => x.id === unitId).description}* \n ${progressbar.filledBar(maxXp, user.unit.xp)[0]} \n XP: ${user.unit.xp}/${maxXp}`)
+		.setDescription(`*${unitStats.starterUnits.find(x => x.id === unitId).description}* \n ${progressbar.filledBar(maxXp-prevMaxXp, user.unit.xp-prevMaxXp)[0]} \n XP: ${user.unit.xp-prevMaxXp}/${maxXp-prevMaxXp}`)
 		.addFields(
 			{ name: 'Health', value: `${user.unit.current_health}/${user.unit.max_health}${emojis.defensive}`, inline: true },
 			{ name: 'Attack', value: `${user.unit.min_attack}-${user.unit.max_attack}${emojis.offensive}`, inline: true },

@@ -30,7 +30,7 @@ function createEmbeds(userBefore, userAfter) {
     return embeds;
 }
 const xpOfLevel = (lv) => {
-    return (baseXp * Math.pow(multiplier, lv - 1) - baseXp);
+    return (Math.round(baseXp * Math.pow(multiplier, lv - 1) - baseXp));
 }
 const getUnitLevel = (xp) => {
     //calculate level, each unit has same xp rate, min lv: 1
