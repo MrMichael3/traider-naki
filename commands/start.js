@@ -153,7 +153,8 @@ module.exports = {
                 return int.reply({ content: `You can't use this button!` });
             };
             const collector = interaction.channel.createMessageComponentCollector({
-                filter
+                filter,
+                time: 120000
             });
             collector.on('collect', async i => {
                 const chosenUnitId = i.customId;
@@ -164,6 +165,7 @@ module.exports = {
                 const validUnitIds = ["druidNaki", "guardNaki", "forestSpirit", "elderSpirit"];
                 if (!validUnitIds.includes(chosenUnitId)) {
                     await i.reply({ content: `The button interaction is not valid! Try again`, ephemeral: true });
+                    return;
                 }
                 else {
                     await i.update({ content: `<@${interaction.user.id}> chose ${chosenUnitName} ${chosenUnitEmoji}.`, embeds: [], components: [] });
@@ -174,12 +176,13 @@ module.exports = {
                         "unit": chosenUnitId
                     }
                     const addedNewUser = await handleNewUser(newUser);
-                    if (!addedNewUser) return console.log(`User ${newUser.id} couldn't be added!`);
-
+                    if (!addedNewUser) { return console.log(`User ${newUser.id} couldn't be added!`); }
+                    collector.stop();
                 }
             });
         }
     },
- findUnitIconsById};
+    findUnitIconsById
+};
 
 //module.exports= findUnitIconsById;
