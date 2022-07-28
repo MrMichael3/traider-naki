@@ -1,4 +1,3 @@
-const { IntegrationExpireBehavior } = require("discord-api-types/v10");
 const mongoose = require("mongoose");
 
 const userSchema = new mongoose.Schema({
