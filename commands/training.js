@@ -69,7 +69,7 @@ module.exports = {
             remainTime = Math.floor((remainTime - Date.now()) / 1000);
             if (remainTime < 120) {
                 //can't end training at last two minutes
-                interaction.reply({ content: `Your training ends in ${remainingTime(remainTime)}` });
+                interaction.reply({ content: `Your training ends in **${remainingTime(remainTime)}**` });
                 return;
             }
             const row = new MessageActionRow()
@@ -85,7 +85,7 @@ module.exports = {
                         .setStyle('DANGER')
                 );
             await interaction.reply({
-                content: `Your training ends in ${remainingTime(remainTime)}. Do you want to end training early? \n Caution: You get less experience by ending training early!`,
+                content: `Your training ends in **${remainingTime(remainTime)}**. Do you want to end training early? \n **Caution:** You get less experience by ending training early!`,
                 components: [row]
             });
             //collector for button interaction
