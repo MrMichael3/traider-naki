@@ -18,7 +18,7 @@ function createEmbeds(user) {
 	var unitName = user.unit.unit_type.replace(/([A-Z])/g, ' $1');
 	unitName = unitName.charAt(0).toUpperCase() + unitName.slice(1);
 	const unitLevel = getUnitLevel(user.unit.xp);
-	const maxXp = xpOfLevel(unitLevel);
+	const maxXp = xpOfLevel(unitLevel + 1);
 	switch (user.unit.unit_type) {
 		case "druidNaki":
 			unitId = 1;
