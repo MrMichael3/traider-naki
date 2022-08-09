@@ -7,7 +7,7 @@ const emojis = require('./../emojis.json');
 const baseXp = 350 //xp for level 0;
 const multiplier = 1.2;
 const levelOne = 0; //xp needed for first lv up
-const statsMultiplier = 20; //increase health and attack per level
+const statsMultiplier = 10; //increase health and attack per level
 
 function createEmbeds(userBefore, userAfter) {
     const embeds = [];
