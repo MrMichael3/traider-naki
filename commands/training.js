@@ -8,11 +8,10 @@ const trainingDuration = 1000 * 3600 * 6; //6hours
 const trainingBaseXp = 40;
 const trainingMultiplier = 1.1;
 
-
+//Training: the user trains for 6 hours to get a fixed amount of xp based on his level.
 async function trainingReward(user, interrupted = false) {
     //get rewarded for training and change status
     if (user.status != "atTraining") {
-        console.log(`User ${user.username} is not at Training!`);
         return;
     }
     user.status = "idle";
@@ -60,7 +59,13 @@ module.exports = {
         .setDescription('A save way to gain experience. Training last 6 hours.'),
     async execute(interaction) {
         //check user status
-        const user = await User.findOne({ discord_id: interaction.user.id }).exec();
+        const user = await User.findOne({ discord_id: interaction.user.id, guild_id: interaction.guildId }).exec();
+        if (!user) {
+            await interaction.reply({
+                content: `You aren't yet in Expelsia. Type '/start' to begin your journey!`
+            });
+            return;
+        }
         const status = user.status;
 
         if (status === "atTraining") {

@@ -8,7 +8,7 @@ const client = new Client(
 const User = require('./User')
 const deleteUserController = require(`./controller/deleteUserController.js`);
 
-deleteUserController("312616992098091010"); //delete user Ramsus for test purpose
+deleteUserController("312616992098091010", "324527754257367040"); //delete user Ramsus for test purpose
 
 //creat a .commands to store all commands
 client.commands = new Collection();
@@ -31,8 +31,8 @@ client.on('interactionCreate', async interaction => {
 	if (!command) return;
 	//check if user exists already (exclude commands where no user is needed)
 	const excludedCommands = ["start", "stats", "help"];
-	if (!excludedCommands.includes(command.data.name) && !await User.findOne({ discord_id: interaction.user.id }).exec()) {
-		await interaction.reply({ content: "You have not selected your origin yet! Type '/start' to start your adventure in Expelsia." });
+	if (!excludedCommands.includes(command.data.name) && !await User.findOne({ discord_id: interaction.user.id, guild_id: interaction.guildId }).exec()) {
+		await interaction.reply({ content: "You have not selected your origin yet! Type '/start' to begin your adventure in Expelsia." });
 		return;
 	}
 	try {

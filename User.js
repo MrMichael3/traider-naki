@@ -5,10 +5,13 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    guild_id: {
+        type: String,
+        required: true
+    },
     discord_id: {
         type: String,
-        required: true,
-        unique: true
+        required: true
     },
     unit: {
         unit_type: String,
@@ -30,7 +33,14 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: () => (Date.now())
     },
-    inventory: { type: Array, default: [] },
+    inventory: [
+        {
+            item_name: String,
+            item_id: String,
+            amount: Number,
+            consumable: Boolean
+        }
+    ],
     soulstones: {
         type: Number,
         default: 0

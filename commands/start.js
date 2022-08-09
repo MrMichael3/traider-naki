@@ -98,8 +98,8 @@ function findUnitIconsById(arrayOfIds) {
     return unitIcons;
 
 }
-async function checkIfUserExists(id) {
-    return await User.findOne({ discord_id: id }).exec();
+async function checkIfUserExists(userId, guildId) {
+    return await User.findOne({ discord_id: userId, guild_id: guildId }).exec();
 }
 module.exports = {
     data: new SlashCommandBuilder()
@@ -107,7 +107,7 @@ module.exports = {
         .setDescription('the beginning of your journey in Expelsia'),
     async execute(interaction) {
         const embedsList = createEmbeds(interaction);
-        const userExists = await checkIfUserExists(interaction.user.id);
+        const userExists = await checkIfUserExists(interaction.user.id, interaction.guildId);
         if (userExists) {
             await interaction.reply({
                 content: `You already joined Expelsia! Try '/stats' to see your stats. If you want to start a new journey type '/new-game' (you will lose all your progress and Soulstones!)`,
@@ -173,6 +173,7 @@ module.exports = {
                     const newUser = {
                         "id": interaction.user.id,
                         "tag": interaction.user.tag,
+                        "guild": interaction.guildId,
                         "unit": chosenUnitId
                     }
                     const addedNewUser = await handleNewUser(newUser);

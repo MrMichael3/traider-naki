@@ -47,7 +47,7 @@ function createEmbeds(user) {
 	const unitStatsEmbed = new MessageEmbed()
 		.setTitle(`${userName}, ${unitName} Level ${unitLevel}`)
 		.setThumbnail(thumbnail)
-		.setDescription(`*${unitStats.starterUnits.find(x => x.id === unitId).description}* \n ${progressbar.filledBar(maxXp-prevMaxXp, user.unit.xp-prevMaxXp)[0]} \n XP: ${user.unit.xp-prevMaxXp}/${maxXp-prevMaxXp}`)
+		.setDescription(`*${unitStats.starterUnits.find(x => x.id === unitId).description}* \n ${progressbar.filledBar(maxXp - prevMaxXp, user.unit.xp - prevMaxXp)[0]} \n XP: ${user.unit.xp - prevMaxXp}/${maxXp - prevMaxXp}`)
 		.addFields(
 			{ name: 'Health', value: `${user.unit.current_health}/${user.unit.max_health}${emojis.defensive}`, inline: true },
 			{ name: 'Attack', value: `${user.unit.min_attack}-${user.unit.max_attack}${emojis.offensive}`, inline: true },
@@ -74,7 +74,7 @@ module.exports = {
 			discordUser = interaction.user;
 		}
 		try {
-			const user = await User.findOne({ discord_id: discordUser.id }).exec();
+			const user = await User.findOne({ discord_id: discordUser.id, guild_id: interaction.guildId }).exec();
 			//show stats
 			const embedsList = createEmbeds(user);
 			await interaction.reply({ embeds: embedsList });

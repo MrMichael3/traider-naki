@@ -17,7 +17,13 @@ module.exports = {
         .setName('mine')
         .setDescription('mine soulstone daily'),
     async execute(interaction) {
-        const getUser = await User.findOne({ discord_id: interaction.user.id }).exec();
+        const getUser = await User.findOne({ discord_id: interaction.user.id, guild_id: interaction.guildId }).exec();
+        if (!getUser) {
+            await interaction.reply({
+                content: `You aren't yet in Expelsia. Type '/start' to begin your journey!`
+            });
+            return;
+        }
         const lastMining = getUser.mining.last_mining;
         const xpBeforeReward = getUser.unit.xp;
         //check if user can mine

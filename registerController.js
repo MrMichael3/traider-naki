@@ -24,9 +24,8 @@ function getUnitStats(u) {
 }
 const handleNewUser = async (user) => {
     //check if user already exists
-    const duplicate = await User.findOne({ discord_id: user.id }).exec();
+    const duplicate = await User.findOne({ discord_id: user.id, guild_id: user.guild }).exec();
     if (duplicate) {
-        console.log(`user ${user.tag} already exists!`);
         return;
     }
     //get initial unit stats
@@ -36,6 +35,7 @@ const handleNewUser = async (user) => {
         const result = await User.create({
             "username": user.tag,
             "discord_id": user.id,
+            "guild_id": user.guild,
             "unit": {
                 "unit_type": user.unit,
                 "current_health": unit.health,
