@@ -14,7 +14,7 @@ async function createEmbeds() {
     for await (const item of Item.find({ consumable: true })) {
         availableItems.push({ name: `${item.name} - ${item.cost} Soulstones`, value: `${item.description}`, inline: true });
     }
-    if ( (await Item.find({ consumable: false })).length != 0) {
+    if ((await Item.find({ consumable: false })).length != 0) {
         availableItems.push({ name: '**Static Items**', value: `Artifacts and other Collectibles` });
         for await (const item of Item.find({ consumable: false })) {
             //iterate through items and add to the array
@@ -62,7 +62,6 @@ module.exports = {
     async execute(interaction) {
         //shop [item]
         if (interaction.options.getString('item')) {
-            console.log(`item: ${interaction.options.getString('item')}`);
             const itemName = interaction.options.getString('item');
             //check if item exists
             const item = await Item.findOne({ name: itemName }).exec();
@@ -71,7 +70,6 @@ module.exports = {
                 return;
             }
             const embedsInfo = createItemEmbeds(item);
-            console.log(`Show information about an item`);
             await interaction.reply({ embeds: embedsInfo });
         }
         else {
