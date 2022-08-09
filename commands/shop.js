@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const User = require('./../User.js');
 const Item = require('./../schemas/Item.js');
+const emojis = require('./../emojis.json');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageEmbed } = require('discord.js');
 
@@ -9,18 +10,12 @@ async function createEmbeds() {
     // An embed message with the shop and all available items
     const embeds = [];
     var thumbnail = "";
-    const availableItems = [{ name: '**Consumables**', value: `Heal Potions, Snacks and more` }];
+    const availableItems = [];
     //iterate through items and add to the array
-    for await (const item of Item.find({ consumable: true })) {
-        availableItems.push({ name: `${item.name} - ${item.cost} Soulstones`, value: `${item.description}`, inline: true });
+    for await (const item of Item.find({ buyable: true })) {
+        availableItems.push({ name: `${item.name} - ${item.cost} ${emojis.soulstone}`, value: `${item.description}`});
     }
-    if ((await Item.find({ consumable: false })).length != 0) {
-        availableItems.push({ name: '**Static Items**', value: `Artifacts and other Collectibles` });
-        for await (const item of Item.find({ consumable: false })) {
-            //iterate through items and add to the array
-            availableItems.push({ name: `${item.name} - ${item.cost} Soulstones`, value: `${item.description}`, inline: true });
-        }
-    }
+  
     //temporary workaround to ensure staying in the limit of fields
     if (availableItems.length > 25) {
         console.log("Too many items in shop!");
@@ -30,7 +25,7 @@ async function createEmbeds() {
         .setTitle(`Traider Naki's Shop`)
         .setThumbnail(thumbnail)
         .setDescription(`*Spend your Soulstones on consumables and static items. \n Use '/shop [item]' to get more information and '/buy [item]' to buy an item.*`)
-        .addFields(availableItems)
+        .addFields(availableItems);
     embeds.push(shopEmbed);
     return embeds;
 }

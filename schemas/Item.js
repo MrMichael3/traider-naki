@@ -25,6 +25,10 @@ const ItemSchema = new mongoose.Schema({
     consumable: {
         type: Boolean,
         default: true
+    },
+    buyable: {
+        type: Boolean,
+        default: true
     }
 });
 
