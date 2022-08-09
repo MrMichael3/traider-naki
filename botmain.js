@@ -30,7 +30,7 @@ client.on('interactionCreate', async interaction => {
 	const command = client.commands.get(interaction.commandName);
 	if (!command) return;
 	//check if user exists already (exclude commands where no user is needed)
-	const excludedCommands = ["start", "stats", "help"];
+	const excludedCommands = ["start", "stats", "help", "shop"];
 	if (!excludedCommands.includes(command.data.name) && !await User.findOne({ discord_id: interaction.user.id, guild_id: interaction.guildId }).exec()) {
 		await interaction.reply({ content: "You have not selected your origin yet! Type '/start' to begin your adventure in Expelsia." });
 		return;

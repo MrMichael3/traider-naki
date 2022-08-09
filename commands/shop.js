@@ -5,7 +5,7 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageEmbed } = require('discord.js');
 
 
-function createEmbeds() {
+async function createEmbeds() {
     // An embed message with the shop and all available items
     const embeds = [];
     var thumbnail = "";
@@ -14,7 +14,7 @@ function createEmbeds() {
     for await (const item of Item.find({ consumable: true })) {
         availableItems.push({ name: `${item.name} - ${item.cost} Soulstones`, value: `${item.description}`, inline: true });
     }
-    if (await Item.find({ consumable: false })) {
+    if ( (await Item.find({ consumable: false })).length != 0) {
         availableItems.push({ name: '**Static Items**', value: `Artifacts and other Collectibles` });
         for await (const item of Item.find({ consumable: false })) {
             //iterate through items and add to the array
@@ -28,7 +28,7 @@ function createEmbeds() {
     const shopEmbed = new MessageEmbed()
         .setTitle(`Traider Naki's Shop`)
         .setThumbnail(thumbnail)
-        .setDescription(`Spend your Soulstones on consumables and static items. \n Use '/shop [item] to get more information and '/buy [item] to buy an item.`)
+        .setDescription(`*Spend your Soulstones on consumables and static items. \n Use '/shop [item]' to get more information and '/buy [item]' to buy an item.*`)
         .addFields(availableItems)
     embeds.push(shopEmbed);
     return embeds;
@@ -56,13 +56,14 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('shop')
         .setDescription('Buy items here')
-        .addStringOption((option) => option
+        .addStringOption(option => option
             .setName('item')
             .setDescription('item name')),
     async execute(interaction) {
         //shop [item]
-        if (interaction.options.get('item')) {
-            const itemName = interaction.options.get('item');
+        if (interaction.options.getString('item')) {
+            console.log(`item: ${interaction.options.getString('item')}`);
+            const itemName = interaction.options.getString('item');
             //check if item exists
             const item = await Item.findOne({ name: itemName }).exec();
             if (!item) {
@@ -70,12 +71,15 @@ module.exports = {
                 return;
             }
             const embedsInfo = createItemEmbeds(item);
+            console.log(`Show information about an item`);
             await interaction.reply({ embeds: embedsInfo });
         }
+        else {
+            //shop without option
+            const embedsList = await createEmbeds();
+            await interaction.reply({ embeds: embedsList });
+        }
 
-        //shop without option
-        const embedsList = createEmbeds();
-        await interaction.reply({ embeds: embedsList });
     }
 
 };
