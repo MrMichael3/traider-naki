@@ -22,7 +22,7 @@ const ItemSchema = new mongoose.Schema({
     image: {
         type: String
     },
-    consumeable: {
+    consumable: {
         type: Boolean,
         default: true
     }
