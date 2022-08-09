@@ -13,7 +13,7 @@ async function createEmbeds() {
     const availableItems = [];
     //iterate through items and add to the array
     for await (const item of Item.find({ buyable: true })) {
-        availableItems.push({ name: `${item.name} - ${item.cost} ${emojis.soulstone}`, value: `${item.description}`});
+        availableItems.push({ name: `${item.name} - ${item.cost} ${emojis.soulstone}`, value: `${item.description_short}`});
     }
   
     //temporary workaround to ensure staying in the limit of fields
@@ -38,10 +38,10 @@ function createItemEmbeds(item) {
     }
     const itemEmbed = new MessageEmbed()
         .setTitle(`${item.name}`)
-        .setDescription(`${item.description}`)
+        .setDescription(`${item.description_long}`)
         .setThumbnail(item.image)
         .addFields(
-            { name: `Price`, value: `${item.cost} Soulstones`, inline: true },
+            { name: `Price`, value: `${emojis.soulstone}${item.cost} Soulstones`, inline: true },
             { name: `Type`, value: `${itemType}`, inline: true }
         )
     embeds.push(itemEmbed);

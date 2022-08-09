@@ -3,14 +3,13 @@ const mongoose = require("mongoose");
 const ItemSchema = new mongoose.Schema({
     name: {
         type: String,
+        unique: true,
         required: true
     },
-    item_id: {
-        type: String,
-        required: true,
-        unique: true
+    description_short: {
+        type: String
     },
-    description: {
+    description_long: {
         type: String
     },
     quantity: {
@@ -25,6 +24,9 @@ const ItemSchema = new mongoose.Schema({
     consumable: {
         type: Boolean,
         default: true
+    },
+    effect: {
+        type: Number
     },
     buyable: {
         type: Boolean,
