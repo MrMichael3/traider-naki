@@ -21,6 +21,7 @@ async function createEmbeds() {
             availableItems.push({ name: `${item.name} - ${item.cost} Soulstones`, value: `${item.description}`, inline: true });
         }
     }
+    //temporary workaround to ensure staying in the limit of fields
     if (availableItems.length > 25) {
         console.log("Too many items in shop!");
         availableItems = availableItems.slice(0, 24);
