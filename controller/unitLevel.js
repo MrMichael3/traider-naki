@@ -23,8 +23,8 @@ function createEmbeds(userBefore, userAfter) {
         .setDescription(`<@${userAfter.discord_id}> the ${unitName}`)
         .addFields(
             { name: '**Level**', value: `**${levelBefore} -> ${levelAfter}**` },
-            { name: '**Health**', value: `${Math.round(userBefore.max_health)}${emojis.defensive} -> ${Math.round(userAfter.unit.max_health)}${emojis.defensive}` },
-            { name: '**Attack**', value: `${Math.round(userBefore.min_attack)}-${Math.round(userBefore.max_attack)}${emojis.offensive} -> ${Math.round(userAfter.unit.min_attack)}-${Math.round(userAfter.unit.max_attack)}${emojis.offensive}` },
+            { name: '**Health**', value: `${userBefore.max_health}${emojis.defensive} -> ${userAfter.unit.max_health}${emojis.defensive}` },
+            { name: '**Attack**', value: `${userBefore.min_attack}-${userBefore.max_attack}${emojis.offensive} -> ${userAfter.unit.min_attack}-${userAfter.unit.max_attack}${emojis.offensive}` },
         )
     embeds.push(unitStats);
     return embeds;
@@ -47,15 +47,16 @@ const levelUp = async (user, xpBefore, channel) => {
     const previousLv = getUnitLevel(xpBefore);
     const userBefore = {};
     const unitType = user.unit.unit_type;
+    const previousHealth = user.unit.max_health;
+    const previousMinAttack = user.unit.min_attack;
+    const previousMaxAttack = user.unit.max_attack;
     userBefore['max_health'] = user.unit.max_health;
     userBefore['min_attack'] = user.unit.min_attack;
     userBefore['max_attack'] = user.unit.max_attack;
     userBefore['xp'] = xpBefore;
 
-    const previousHealth = user.unit.max_health;
-    const previousMinAttack = user.unit.min_attack;
-    const previousMaxAttack = user.unit.max_attack;
-    if (lv <= previousLv && xpOfLevel(lv+1)> xp) {
+
+    if (lv <= previousLv && xpOfLevel(lv + 1) > xp) {
         console.log(`error: ${user.username} lv ${lv} hasn't leveled up!`);
         return;
     }
@@ -83,11 +84,10 @@ const levelUp = async (user, xpBefore, channel) => {
         default:
             console.log(`the unit ${user.unit.unit_type} doesn't exist!`);
     }
-    user.unit.current_health = Math.min(user.unit.current_health + user.unit.max_health - previousHealth, user.unit.max_health);
-    user.unit.max_health = Math.round((user.unit.max_health + Number.EPSILON) * 100) / 100;
-    user.unit.current_health = Math.min(user.unit.current_health + user.unit.max_health - previousHealth, user.unit.max_health);
-    user.unit.min_attack = Math.round((user.unit.min_attack + Number.EPSILON) * 100) / 100;
-    user.unit.max_attack = Math.round((user.unit.max_attack + Number.EPSILON) * 100) / 100;
+    user.unit.current_health = Math.round(Math.min(user.unit.current_health + Math.max(user.unit.max_health - previousHealth, 0), user.unit.max_health));
+    user.unit.max_health = Math.round((user.unit.max_health + Number.EPSILON));
+    user.unit.min_attack = Math.round((user.unit.min_attack + Number.EPSILON) * 10) / 10;
+    user.unit.max_attack = Math.round((user.unit.max_attack + Number.EPSILON) * 10) / 10;
     await user.save();
 
     //show new stats
