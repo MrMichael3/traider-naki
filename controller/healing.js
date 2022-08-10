@@ -25,7 +25,7 @@ const healUnit = async (user, amount, daily = false) => {
             return false;
         }
         currentHealth = Math.min(currentHealth + (maxHealth * amount), maxHealth);
-        user.unit.current_health = currentHealth;
+        user.unit.current_health = Math.round(currentHealth);
         user.unit.last_health_update = Date.now();
         await user.save();
         return true;
@@ -34,13 +34,13 @@ const healUnit = async (user, amount, daily = false) => {
         //percentage heal
         console.log(`percentage heal`);
         currentHealth = Math.min(currentHealth + (maxHealth * amount), maxHealth);
-        user.unit.current_health = currentHealth;
+        user.unit.current_health = Math.round(currentHealth);
         await user.save();
         return true;
     }
     console.log(`absolute heal`);
     currentHealth = Math.min(currentHealth+amount, maxHealth);
-    user.unit.current_health = currentHealth;
+    user.unit.current_health = Math.round(currentHealth);
     await user.save();
     return true;
 
