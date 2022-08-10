@@ -39,12 +39,12 @@ module.exports = {
                 }
                 if (item.consumable) {
                     //create a string of all consumable items the user has
-                    const itemDescription = (await Item.findOne({ name: item.item_name }).exec()).description;
+                    const itemDescription = (await Item.findOne({ name: item.item_name }).exec()).description_short;
                     let itemString = ``;
                     if (item.amount < 10) {
                         itemString = `0`;
                     }
-                    itemString = itemString + `${item.amount}x **${item.item_name}**: ${itemDescription}\n`;
+                    itemString = `**` + itemString + `${item.amount}**x **${item.item_name}**: ${itemDescription}\n`;
                     consumableItems = consumableItems + itemString;
                 }
             }
