@@ -17,25 +17,28 @@ module.exports = {
         .setDescription('Show your items and soulstones'),
     async execute(interaction) {
 
+
+        const user = await User.findOne({ discord_id: interaction.user.id, guild_id: interaction.guildId });
+        const artifacts = await Item.find({ consumable: false }).exec();
+
+        var amountOfArtifacts = 0;
+        var userArtifacts = 0;
+        var consumableItems = "";
+        var staticItems = "";
+        if (artifacts) {
+            //update how many artifacts exists
+            amountOfArtifacts = artifacts.length;
+        }
         try {
-            const user = await User.findOne({ discord_id: interaction.user.id, guild_id: interaction.guildId });
-            const artifacts = await Item.find({ consumable: false }).exec();
-            var amountOfArtifacts = 0;
-            if (artifacts) {
-                amountOfArtifacts = artifacts.length;
-            }
-            const userArtifacts = 0;
-            var consumableItems = "";
-            var staticItems = "";
             for (const item of user.inventory) {
+                //create a string of all artifacts the user has
                 if (!item.consumable) {
                     let itemString = `**${item.item_name}**\n`;
                     staticItems = staticItems + itemString;
                     userArtifacts += 1;
                 }
-            }
-            for (const item of user.inventory) {
                 if (item.consumable) {
+                    //create a string of all consumable items the user has
                     const itemDescription = (await Item.findOne({ name: item.item_name }).exec()).description;
                     let itemString = ``;
                     if (item.amount < 10) {
@@ -45,27 +48,32 @@ module.exports = {
                     consumableItems = consumableItems + itemString;
                 }
             }
-            if (staticItems.length === 0) {
-                staticItems = "-";
-            }
-            if (consumableItems.length === 0) {
-                consumableItems = "-";
-            }
-            const itemsList = [
-                { name: 'Consumables', value: `${consumableItems}` },
-                { name: `Artifacts ${userArtifacts}/${amountOfArtifacts}`, value: `${staticItems}` }
-
-            ];
-
-            //create Embed
-            const inventoryEmbed = new MessageEmbed()
-                .setTitle(`${user.username.slice(0, user.username.indexOf('#'))}, the ${beautifyUnitName(user.unit.unit_type)}, Level ${getUnitLevel(user.unit.xp)}`)
-                .setDescription(`${emojis.soulstone}${user.soulstones} Soulstones`)
-                .addFields(itemsList);
-            await interaction.reply({ embeds: [inventoryEmbed] });
         }
         catch {
-            await interaction.reply({ content: `inventory command failed!` });
+            console.log(`Invalid items in inventory`);
+            //TODO: remove invalid items and redo command
+            await interaction.reply({ content: `Inventory corrupted, ask Ramsus for help!` });
+            return;
         }
+
+        if (staticItems.length === 0) {
+            staticItems = "-";
+        }
+        if (consumableItems.length === 0) {
+            consumableItems = "-";
+        }
+        const itemsList = [
+            { name: 'Consumables', value: `${consumableItems}` },
+            { name: `Artifacts ${userArtifacts}/${amountOfArtifacts}`, value: `${staticItems}` }
+
+        ];
+
+        //create Embed
+        const inventoryEmbed = new MessageEmbed()
+            .setTitle(`${user.username.slice(0, user.username.indexOf('#'))}, the ${beautifyUnitName(user.unit.unit_type)}, Level ${getUnitLevel(user.unit.xp)}`)
+            .setDescription(`${emojis.soulstone}${user.soulstones} Soulstones`)
+            .addFields(itemsList);
+        await interaction.reply({ embeds: [inventoryEmbed] });
+
     }
 };
