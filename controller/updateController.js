@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const User = require('./../User.js');
+const { trainingReward } = require('./../commands/training.js');
 
 //const completeStatusList = ["idle", "atQuest", "endQuest", "atEvent", "atTraining", "unconscious"];
 const statusWithEndTime = ["atQuest", "atEvent", "atTraining", "unconscious"];
@@ -26,10 +27,8 @@ const checkForUpdates = async () => {
                     break;
 
                 case "atTraining":
-                    //set status to idle, give training rewards
-                    user.status = "idle";
-                    //TODO: give training rewards
-                    await user.save();
+                    const xpReward = trainingReward(user);
+                    //TODO: send notification to chosen channel. server admin has to select a message channel for the bot
                     break;
 
                 case "unconscious":
