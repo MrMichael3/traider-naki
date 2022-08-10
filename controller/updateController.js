@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const User = require('./../User.js');
 const { trainingReward } = require('./../commands/training.js');
+const { levelUp, getUnitLevel } = require('./unitLevel.js');
 
 //const completeStatusList = ["idle", "atQuest", "endQuest", "atEvent", "atTraining", "unconscious"];
 const statusWithEndTime = ["atQuest", "atEvent", "atTraining", "unconscious"];
@@ -27,7 +28,10 @@ const checkForUpdates = async () => {
                     break;
 
                 case "atTraining":
-                    const xpReward = trainingReward(user);
+                    const xpBefore = user.unit.xp;
+                    await trainingReward(user);
+                    const userAfterReward = await User.findOne({ discord_id: user.discord_id, guild_id: user.guild_id });
+                    await levelUp(userAfterReward, xpBefore);
                     //TODO: send notification to chosen channel. server admin has to select a message channel for the bot
                     break;
 

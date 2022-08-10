@@ -92,7 +92,9 @@ const levelUp = async (user, xpBefore, channel) => {
 
     //show new stats
     embedsList = createEmbeds(userBefore, user);
-    await channel.send({ embeds: embedsList });
+    if (channel) {
+        await channel.send({ embeds: embedsList });
+    }
     return;
 }
 module.exports = { getUnitLevel, levelUp, xpOfLevel };
