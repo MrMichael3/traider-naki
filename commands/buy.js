@@ -15,7 +15,7 @@ module.exports = {
     async execute(interaction) {
         const item = await Item.findOne({ name: interaction.options.getString('item') }).exec();
         //check if item exist
-        if (!item || Object.keys(item).length === 0) {
+        if (!item || Object.keys(item).length === 0 || !item.buyable) {
             interaction.reply({ content: `The item *'${interaction.options.getString('item')}'* does not exist in the shop!` });
             return;
         }
