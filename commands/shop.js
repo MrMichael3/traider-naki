@@ -24,7 +24,7 @@ async function createEmbeds() {
     const shopEmbed = new MessageEmbed()
         .setTitle(`Traider Naki's Shop`)
         .setThumbnail(thumbnail)
-        .setDescription(`*Spend your Soulstones on consumables and static items. \n Use '/shop [item]' to get more information and '/buy [item]' to buy an item.*`)
+        .setDescription(`*Spend your Soulstones on consumables and other items. \n Use '/shop [item]' to get more information and '/buy [item]' to buy an item.*`)
         .addFields(availableItems);
     embeds.push(shopEmbed);
     return embeds;
@@ -32,7 +32,7 @@ async function createEmbeds() {
 function createItemEmbeds(item) {
     // An embed message with details of selected item
     const embeds = [];
-    var itemType = "Static";
+    var itemType = "Artifact";
     if (item.consumable) {
         itemType = "Consumable";
     }
