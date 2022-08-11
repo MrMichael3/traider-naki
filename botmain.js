@@ -1,16 +1,19 @@
-require('dotenv').config()
-const fs = require('node:fs')
-const path = require('node:path')
+require('dotenv').config();
+const fs = require('node:fs');
+const path = require('node:path');
 const { Client, Collection, Intents } = require('discord.js');
 const client = new Client(
 	{ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] }
 );
-const User = require('./User')
+const User = require('./User');
+const Quest = require('./schemas/Quest');
 const deleteUserController = require(`./controller/deleteUserController.js`);
+
 
 //deleteUserController("312616992098091010", "324527754257367040"); //delete user Ramsus for test purpose
 
-//creat a .commands to store all commands
+
+//create a .commands to store all commands
 client.commands = new Collection();
 const commandsPath = path.join(__dirname, 'commands');
 const commandFiles = fs.readdirSync(commandsPath).filter(file => file.endsWith('.js'));

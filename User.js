@@ -58,11 +58,9 @@ const userSchema = new mongoose.Schema({
         {
             title: {
                 type: String,
-                required: true
             },
             difficulty: {
                 type: Number,  // 1: easy, 2: medium,  3: hard
-                required: true
             },
             duration: {
                 type: Number, //in seconds

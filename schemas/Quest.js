@@ -10,11 +10,8 @@ const QuestSchema = new mongoose.Schema({
         type: String,
         default: "A dangerous quest!"
     },
-    regions: { //location of the quest per stage
-        stage_one: String,
-        stage_two: String,
-        stage_three: String
-    },
+    regions: String, //which island type the quest is at
+   
     type: { //"exploration", "combat", "treasure hunt"
         type: String,
         required: true
