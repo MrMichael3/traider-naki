@@ -56,11 +56,18 @@ const userSchema = new mongoose.Schema({
     },
     quest: [
         {
-            title: String,
-            description: String,
-            type: String,
-            difficulty: Number, // 1: easy, 2: medium,  3: hard
-            duration: Number, //in seconds
+            title: {
+                type: String,
+                required: true
+            },
+            difficulty: {
+                type: Number,  // 1: easy, 2: medium,  3: hard
+                required: true
+            },
+            duration: {
+                type: Number, //in seconds
+                default: 3600
+            },
             enemies: [
                 {
                     unit: String,
@@ -71,22 +78,7 @@ const userSchema = new mongoose.Schema({
                     },
                     stage: Number
                 }
-            ],
-            rewards: {
-                soulstone: {
-                    type: Number,
-                    default: 0
-                },
-                xp: {
-                    type: Number,
-                    default: 0
-                },
-                artifact: {
-                    type: String,
-                    default: ""
-                }
-            }
-
+            ]
         }
     ],
     pvp_battles: [{
