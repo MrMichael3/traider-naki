@@ -70,10 +70,6 @@ const userSchema = new mongoose.Schema({
                 {
                     unit: String,
                     level: Number,
-                    amount: {
-                        type: Number,
-                        default: 1
-                    },
                     stage: Number
                 }
             ]

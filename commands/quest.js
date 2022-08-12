@@ -82,24 +82,23 @@ async function createQuests(user) {
         }
         const playerPower = user.unit.max_health * (user.unit.min_attack + user.unit.max_attack) / 2;
         const enemyPower = playerPower * (Math.floor(Math.random() * 15 + 16) / 100 * factor * diff); //easy quest: 12%-22.5% of playerPower, hard quest: 72%-135% of pp
-        console.log(`playerPower: ${playerPower}\nenemyPower: ${enemyPower}`);
         let stage = 1;
         //calculate how enemy power is distributed on three stages
         const powerPerStage = [];
-        powerPerStage.push(Math.floor(Math.random() * 21) * enemyPower);
-        powerPerStage.push(Math.floor(Math.random() * 51) * enemyPower);
-        powerPerStage.push(enemyPower - powerPerStage[0]-powerPerStage[1]);
+        powerPerStage.push(Math.floor(Math.random() * 21) / 100 * enemyPower);
+        powerPerStage.push(Math.floor(Math.random() * 51) / 100 * enemyPower);
+        powerPerStage.push(enemyPower - powerPerStage[0] - powerPerStage[1]);
         let possibleEnemies = [];
         switch (quest.region) {
             case "Magic Marsh":
-                possibleEnemies = ["Nyxi", "Pangoan"];
+                possibleEnemies = ["Nyxi", "Nyxi", "Nyxi", "Pangoan"];
                 break;
             case "Mysterious Wasteland":
-                possibleEnemies = ["Ranax", "Pangoan"];
+                possibleEnemies = ["Nyxi","Ranax", "Pangoan"];
 
                 break;
             case "Dark Desert":
-                possibleEnemies = ["Ranax", "Athlas"];
+                possibleEnemies = ["Ranax", "Ranax","Athlas"];
 
                 break;
             case "Crater of Immortality":
@@ -112,25 +111,24 @@ async function createQuests(user) {
         }
         while (stage < 4) {
             //calculate enemys for every stage
-            try{
-            const enemyType = possibleEnemies[Math.floor(Math.random() * 2)];
+            try {
+                var enemyType = possibleEnemies[Math.floor(Math.random() * possibleEnemies.length)];
             }
-            catch{
+            catch {
                 console.log("enemyType not available");
             }
             const enemy = unitData.wildCreatures.find(x => x.name === enemyType);
             const baseAttack = (enemy.minAttack + enemy.maxAttack) / 2;
-            const unitLvl = Math.log(powerPerStage[stage - 1] / (enemy.health * baseAttack)) / Math.log(1.2);
-            console.log(`unitLvl: ${unitLvl}`);
-            enemies.push({ unit: enemyType, level: unitLvl, stage: stage });
+            const unitLvl = Math.max(0, Math.round(Math.log(powerPerStage[stage - 1] / (enemy.health * baseAttack)) / Math.log(1.2)));
+            if (unitLvl > 0) {
+                createQuest.enemies.push({ unit: enemyType, level: unitLvl, stage: stage });
+            }
             stage++;
         }
-        console.log(`quest ${counter}:`)
-        createQuest.enemies.push(enemies);
         //add complete quest to the list of quests
         quests.push(createQuest);
+
     }
-    console.log(`Quest one: ${quests[0]}\n Quest two: ${quests[1]}\nQuest three: ${quests[2]}`);
     return quests;
 }
 module.exports = {
@@ -160,7 +158,8 @@ module.exports = {
                 if (user.quest.length === 0) {
                     //create three quest options
                     user.quest = await createQuests(user);
-                    console.log(`created Quests: ${user.quest}`);
+                    //create embed message
+                    
 
                 }
                 //create selection embedded message
@@ -193,6 +192,10 @@ module.exports = {
             case 'endQuest':
                 //get rewarded
                 console.log('endQuest');
+                user.quest = [];
+                user.status = "idle";
+                await user.save();
+                await interaction.reply({ content: `You quest ended` });
                 break;
             default:
                 //quest not available

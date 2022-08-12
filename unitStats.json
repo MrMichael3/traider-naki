@@ -82,7 +82,7 @@
         {
             "id": 6,
             "name": "Pangoan",
-            "health": 120,
+            "health": 100,
             "minAttack": 8,
             "maxAttack": 10,
             "strongAgainst": [],
