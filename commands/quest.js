@@ -42,7 +42,7 @@ function readableTime(ms) {
         time += min + " min ";
         sec -= min * 60;
     }
-    if (sec > 0 && ms<3600*1000) {
+    if (sec > 0 && ms < 3600 * 1000) {
         sec = Math.round(sec);
         time += sec + " sec";
     }
@@ -75,7 +75,6 @@ async function createQuests(user) {
         else if (counter === 1) {
             //make first quest of difficulty 1 if possible
             diff = 1;
-            console.log("Come here only once!");
         }
         createQuest.difficulty = diff;
         //duration
@@ -184,6 +183,58 @@ async function createSelectionEmbed(user) {
     embeds.push(selectionEmbed);
     return embeds;
 }
+
+async function fightSimulator(user, enemy) {
+    //computes the result of two units fighting each other
+    //formula: health = baseHealth (lv1) * ((100+20)/100)^level
+    var result;
+    const baseEnemy = unitData.wildCreatures.find(x => x.name === enemy.unit);
+    if (!baseEnemy) {
+        console.log(`Error, enemy '${enemy.unit}' not found in fightSimulator!`);
+        result = { success: true, currentHealth: user.unit.current_health };
+        return result;
+    }
+    const userHealth = user.unit.current_health;
+    const enemyHealth = Math.round(baseEnemy.health * Math.pow(1.2, enemy.level));
+    const enemyAttack = [Math.round(baseEnemy.minAttack * Math.pow(1.2, enemy.level) * 100) / 100, Math.round(baseEnemy.maxAttack * Math.pow(1.2, enemy.level) * 100) / 100];
+    const playerAttacksFirst = Math.round(Math.random());
+    while (true) {
+        //fight until one unit dies
+        let attack = 0;
+        if (playerAttacksFirst) {
+            //player attacks
+            console.log(`Player attacks!`);
+            attack = Math.floor((Math.random() * (user.unit.max_attack - user.unit.min_attack) + user.unit.min_attack) * 100) / 100;
+            console.log(`Player attacks with ${attack} atk`);
+            enemyHealth = Math.max(enemyHealth - attack, 0);
+            if (enemyHealth === 0) {
+                //player wins the fight
+                console.log(`Players wins!`);
+                //TODO: WIN
+            }
+        }
+        //enemy attacks
+        //TODO: attack
+
+        if (!playerAttacksFirst) {
+            //player attacks
+            console.log(`Player attacks!`);
+            attack = Math.floor((Math.random() * (user.unit.max_attack - user.unit.min_attack) + user.unit.min_attack) * 100) / 100;
+            console.log(`Player attacks with ${attack} atk`);
+            enemyHealth = Math.max(enemyHealth - attack, 0);
+            if (enemyHealth === 0) {
+                //player wins the fight
+                console.log(`Players wins!`);
+                //TODO: WIN
+            }
+        }
+
+
+    }
+
+
+
+}
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('quest')
@@ -210,6 +261,8 @@ module.exports = {
                 if (user.quest.length === 0) {
                     //create three quest options
                     user.quest = await createQuests(user);
+                    await user.save();
+                    user = await User.findOne({ discord_id: interaction.user.id, guild_id: interaction.guildId });
                 }
                 const row = new MessageActionRow()
                     .addComponents(
@@ -257,10 +310,9 @@ module.exports = {
 
                 });
                 break;
+
             case 'atQuest':
                 //show remaining time
-                console.log('atQuest');
-
                 if (user.quest.length === 0) {
                     //no quest selected
                     await interaction.reply({ content: `No quest found, your are now idle. Type '/quest' to start a new quest.` });
@@ -276,14 +328,61 @@ module.exports = {
                     await user.save();
                     return;
                 }
-                await interaction.reply({ content: `You are currently on the quest **${user.quest[0].title}**.\nRemaining time: **${readableTime(user.status_time-Date.now())}**` });
+                await interaction.reply({ content: `You are currently on the quest **${user.quest[0].title}**.\nRemaining time: **${readableTime(user.status_time - Date.now())}**` });
                 return;
             case 'endQuest':
-                //get rewarded
-                console.log('endQuest');
+                if (user.status_time > Date.now() && user.quest.length === 1) {
+                    console.log("Quest is still ongoing!");
+                    user.status = "atQuest";
+                    await user.save();
+                    await interaction.reply({ content: `The quest **${user.quest[0].title}** is still ongoing! Come back in **${readableTime(user.status_time - Date.now())}**.` });
+                    return;
+                }
+                if (user.quest.length != 1) {
+                    user.status = "idle";
+                    await user.save();
+                    await interaction.reply({ content: `No quest found. Type '/quest' to start a new quest.` });
+                    return;
+                }
+                //get rewards
+                let combatStage = 0;
+                let success = true;
+                while (combatStage < 3 && success) {
+                    //iterate through the three stages
+                    combatStage++;
+                    let stageEnemy = user.quest[0].enemies.find(x => x.stage === combatStage);
+                    console.log(`stage enemy: ${stageEnemy} at stage ${combatStage}`);
+                    if (!stageEnemy) {
+                        //no enemy at this stage
+                    }
+                    else {
+                        //enemy at this stage
+                        const combatReport = await fightSimulator(user, stageEnemy);
+                        if (!combatReport.success) {
+                            //user lost fight
+                            success = false;
+                            user.status = "unconscious";
+                            combatStage = 4;
+                            break;
+                        }
+                        //set health
+                        user.unit.current_health = combatReport.currentHealth;
+                        if (user.unit.current_health <= 0) {
+                            success = false;
+                        }
+
+                        //get reward for this stage
+                    }
+
+                }
+                //create text
+
+                //reset quest and status
                 user.quest = [];
                 user.status = "idle";
                 await user.save();
+
+                //send reply
                 await interaction.reply({ content: `You quest ended` });
                 break;
             default:
