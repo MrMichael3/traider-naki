@@ -10,7 +10,7 @@ const QuestSchema = new mongoose.Schema({
         type: String,
         default: "A dangerous quest!"
     },
-    regions: String, //which island type the quest is at
+    region: String, //which island type the quest is at
    
     type: { //"exploration", "combat", "treasure hunt"
         type: String,

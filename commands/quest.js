@@ -3,6 +3,9 @@ const User = require('./../User.js');
 const Item = require('./../schemas/Item.js');
 const Quest = require('./../schemas/Quest.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
+const unitData = require('./../unitStats.json');
+
+const minDuration = 3600 //minimum duration of quests in seconds
 
 
 function readableTime(ms) {
@@ -46,14 +49,88 @@ function readableTime(ms) {
 }
 
 async function createQuests(user) {
-//create three quests
-const quests = [];
-//select a random quest
-const count = await Quest.count().exec();
-const r = Math.floor(Math.random()*count);
-const quest = await Quest.findOne().skip(r).exec();
-console.log(`Quest: ${quest.title}`);
+    //create three quests
+    const quests = [];
+    let counter = 0;
+    while (counter < 3) {
+        counter++;
+        //select a random quest
+        const c = await Quest.count().exec();
+        const random = Math.floor(Math.random() * c);
+        const quest = await Quest.findOne().skip(random).exec();
+        let createQuest = {};
+        createQuest.enemies = [];
+        createQuest.title = quest.title;
+        //difficulty
+        const diff = Math.floor(Math.random() * 3) + 1;
+        if (quest.type === "treasure hunt") {
+            //treasure hunt must be difficulty 2 or 3
+            diff = Math.min(diff + 1, 3);
+        }
+        createQuest.difficulty = diff;
+        //duration
+        const duration = (Math.floor(Math.random() * 36000) + minDuration) * diff; //quest duration at maximum 33h
+        createQuest.duration = duration;
+        //enemies
+        const enemies = [];
+        let factor = 0.75; //factor how strong enemies are
+        if (quest.type === "combat") {
+            factor = 1.5;
+        }
+        else if (quest.type === "treasure hunt") {
+            factor = 1.25;
+        }
+        const playerPower = user.unit.max_health * (user.unit.min_attack + user.unit.max_attack) / 2;
+        const enemyPower = playerPower * (Math.floor(Math.random() * 15 + 16) / 100 * factor * diff); //easy quest: 12%-22.5% of playerPower, hard quest: 72%-135% of pp
+        console.log(`playerPower: ${playerPower}\nenemyPower: ${enemyPower}`);
+        let stage = 1;
+        //calculate how enemy power is distributed on three stages
+        const powerPerStage = [];
+        powerPerStage.push(Math.floor(Math.random() * 21) * enemyPower);
+        powerPerStage.push(Math.floor(Math.random() * 51) * enemyPower);
+        powerPerStage.push(enemyPower - powerPerStage[0]-powerPerStage[1]);
+        let possibleEnemies = [];
+        switch (quest.region) {
+            case "Magic Marsh":
+                possibleEnemies = ["Nyxi", "Pangoan"];
+                break;
+            case "Mysterious Wasteland":
+                possibleEnemies = ["Ranax", "Pangoan"];
 
+                break;
+            case "Dark Desert":
+                possibleEnemies = ["Ranax", "Athlas"];
+
+                break;
+            case "Crater of Immortality":
+                possibleEnemies = ["Athlas", "Athlas"];
+
+                break;
+            default:
+                console.log(`region ${quest.region} is unknown`);
+                possibleEnemies = ["Nyxi", "Pangoan"];
+        }
+        while (stage < 4) {
+            //calculate enemys for every stage
+            try{
+            const enemyType = possibleEnemies[Math.floor(Math.random() * 2)];
+            }
+            catch{
+                console.log("enemyType not available");
+            }
+            const enemy = unitData.wildCreatures.find(x => x.name === enemyType);
+            const baseAttack = (enemy.minAttack + enemy.maxAttack) / 2;
+            const unitLvl = Math.log(powerPerStage[stage - 1] / (enemy.health * baseAttack)) / Math.log(1.2);
+            console.log(`unitLvl: ${unitLvl}`);
+            enemies.push({ unit: enemyType, level: unitLvl, stage: stage });
+            stage++;
+        }
+        console.log(`quest ${counter}:`)
+        createQuest.enemies.push(enemies);
+        //add complete quest to the list of quests
+        quests.push(createQuest);
+    }
+    console.log(`Quest one: ${quests[0]}\n Quest two: ${quests[1]}\nQuest three: ${quests[2]}`);
     return quests;
 }
 module.exports = {
@@ -82,14 +159,11 @@ module.exports = {
                 }
                 if (user.quest.length === 0) {
                     //create three quest options
-                    user.quest = createQuests(user);
+                    user.quest = await createQuests(user);
+                    console.log(`created Quests: ${user.quest}`);
 
                 }
                 //create selection embedded message
-
-
-
-
                 await interaction.editReply({ content: `Thanks for waiting` });
                 user.status = "atQuest";
                 user.status_time = Date.now() + 3600 * 2;
