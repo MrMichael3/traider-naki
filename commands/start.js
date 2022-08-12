@@ -12,7 +12,7 @@ const handleNewUser = require('./../registerController');
 
 
 //create embed unit descriptions
-function createEmbeds(interaction) {
+function createEmbeds() {
     // TODO: Create forward/back buttons instead of 4 embeds
     const embeds = [];
     //druid Naki
@@ -106,7 +106,7 @@ module.exports = {
         .setName('start')
         .setDescription('the beginning of your journey in Expelsia'),
     async execute(interaction) {
-        const embedsList = createEmbeds(interaction);
+        const embedsList = createEmbeds();
         const userExists = await checkIfUserExists(interaction.user.id, interaction.guildId);
         if (userExists) {
             await interaction.reply({
