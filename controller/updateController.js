@@ -36,7 +36,6 @@ const checkForUpdates = async () => {
                     break;
 
                 case "unconscious":
-                    console.log(`${user.username}, ${user.status}: unconscious`);
                     //set status to idle, change currentHealth
                     user.status = "idle";
                     user.unit.current_health = user.unit.max_health;
