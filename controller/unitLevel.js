@@ -85,6 +85,9 @@ const levelUp = async (user, xpBefore, channel) => {
             console.log(`the unit ${user.unit.unit_type} doesn't exist!`);
     }
     user.unit.current_health = Math.round(Math.min(user.unit.current_health + Math.max(user.unit.max_health - previousHealth, 0), user.unit.max_health));
+    if(user.status === "unconscious"){
+        user.unit.current_health = 0;
+    }
     user.unit.max_health = Math.round((user.unit.max_health + Number.EPSILON));
     user.unit.min_attack = Math.round((user.unit.min_attack + Number.EPSILON) * 10) / 10;
     user.unit.max_attack = Math.round((user.unit.max_attack + Number.EPSILON) * 10) / 10;
