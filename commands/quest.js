@@ -151,6 +151,7 @@ async function createSelectionEmbed(user) {
         let diffStars = "";
         let possibleEnemy = "";
         let description = "";
+        let questType = "";
         switch (user.quest[counter].difficulty) {
             case 1:
                 diffStars = emojis.battlepoint;
@@ -168,7 +169,8 @@ async function createSelectionEmbed(user) {
         }
         let q = await Quest.findOne({ title: user.quest[counter].title }).exec();
         description = q.description;
-        questStats.push({ diffStars: diffStars, possibleEnemy: possibleEnemy, description: description });
+        questType = q.type;
+        questStats.push({ diffStars: diffStars, possibleEnemy: possibleEnemy, description: description, questType: questType });
         counter++;
     }
     //create embedded message
@@ -176,9 +178,9 @@ async function createSelectionEmbed(user) {
         .setTitle(`Choose a Quest`)
         .setDescription(`You can choose between three quests of different difficulty (${emojis.battlepoint}) and duration.`)
         .addFields(
-            { name: `${user.quest[0].title} ${questStats[0].diffStars}`, value: `${questStats[0].description}\n**Duration:** ${readableTime(user.quest[0].duration * 1000)}\n **Possible enemy:** ${questStats[0].possibleEnemy}`, inline: true },
-            { name: `${user.quest[1].title} ${questStats[1].diffStars}`, value: `${questStats[1].description}\n**Duration:** ${readableTime(user.quest[1].duration * 1000)}\n **Possible enemy:** ${questStats[1].possibleEnemy}`, inline: true },
-            { name: `${user.quest[2].title} ${questStats[2].diffStars}`, value: `${questStats[2].description}\n**Duration:** ${readableTime(user.quest[2].duration * 1000)}\n **Possible enemy:** ${questStats[2].possibleEnemy}`, inline: true }
+            { name: `${user.quest[0].title}\n${questStats[0].diffStars}`, value: `${questStats[0].description}\n\n**Duration:** ${readableTime(user.quest[0].duration * 1000)}\n **Type:** ${questStats[0].questType}\n**Possible enemy:** ${questStats[0].possibleEnemy}`, inline: true },
+            { name: `${user.quest[1].title}\n${questStats[1].diffStars}`, value: `${questStats[1].description}\n\n**Duration:** ${readableTime(user.quest[1].duration * 1000)}\n **Type:** ${questStats[1].questType}\n**Possible enemy:** ${questStats[1].possibleEnemy}`, inline: true },
+            { name: `${user.quest[2].title}\n${questStats[2].diffStars}`, value: `${questStats[2].description}\n\n**Duration:** ${readableTime(user.quest[2].duration * 1000)}\n **Type:** ${questStats[2].questType}\n**Possible enemy:** ${questStats[2].possibleEnemy}`, inline: true }
         );
     embeds.push(selectionEmbed);
     return embeds;
@@ -187,53 +189,61 @@ async function createSelectionEmbed(user) {
 async function fightSimulator(user, enemy) {
     //computes the result of two units fighting each other
     //formula: health = baseHealth (lv1) * ((100+20)/100)^level
-    var result;
+    var result = {};
     const baseEnemy = unitData.wildCreatures.find(x => x.name === enemy.unit);
     if (!baseEnemy) {
         console.log(`Error, enemy '${enemy.unit}' not found in fightSimulator!`);
         result = { success: true, currentHealth: user.unit.current_health };
         return result;
     }
-    const userHealth = user.unit.current_health;
-    const enemyHealth = Math.round(baseEnemy.health * Math.pow(1.2, enemy.level));
-    const enemyAttack = [Math.round(baseEnemy.minAttack * Math.pow(1.2, enemy.level) * 100) / 100, Math.round(baseEnemy.maxAttack * Math.pow(1.2, enemy.level) * 100) / 100];
-    const playerAttacksFirst = Math.round(Math.random());
-    while (true) {
+    let userHealth = user.unit.current_health;
+    let enemyHealth = Math.round(baseEnemy.health * Math.pow(1.2, enemy.level));
+    let enemyAttack = [Math.round(baseEnemy.minAttack * Math.pow(1.2, enemy.level) * 100) / 100, Math.round(baseEnemy.maxAttack * Math.pow(1.2, enemy.level) * 100) / 100];
+    let playerAttacks = Math.round(Math.random());
+    let c = 0;
+    let fightOnGoing = true;
+    while (fightOnGoing) {
+        c++;
         //fight until one unit dies
         let attack = 0;
-        if (playerAttacksFirst) {
+        if (playerAttacks) {
             //player attacks
-            console.log(`Player attacks!`);
+            console.log(`${c}: Player attacks!`);
+            playerAttacks = 0;
             attack = Math.floor((Math.random() * (user.unit.max_attack - user.unit.min_attack) + user.unit.min_attack) * 100) / 100;
+            //TODO: Increase attack if effective
             console.log(`Player attacks with ${attack} atk`);
             enemyHealth = Math.max(enemyHealth - attack, 0);
+            console.log(`enemy health: ${enemyHealth}`);
             if (enemyHealth === 0) {
                 //player wins the fight
                 console.log(`Players wins!`);
+                result.success = true;
+                result.currentHealth = userHealth;
+                fightOnGoing = false;
                 //TODO: WIN
             }
         }
-        //enemy attacks
-        //TODO: attack
-
-        if (!playerAttacksFirst) {
-            //player attacks
-            console.log(`Player attacks!`);
-            attack = Math.floor((Math.random() * (user.unit.max_attack - user.unit.min_attack) + user.unit.min_attack) * 100) / 100;
-            console.log(`Player attacks with ${attack} atk`);
-            enemyHealth = Math.max(enemyHealth - attack, 0);
-            if (enemyHealth === 0) {
-                //player wins the fight
-                console.log(`Players wins!`);
-                //TODO: WIN
+        else {
+            //enemy attacks
+            console.log(`${c}: enemy atacks`);
+            playerAttacks = 1;
+            attack = Math.floor((Math.random() * (enemyAttack[1] - enemyAttack[0]) + enemyAttack[0]) * 100) / 100;
+            //TODO: Increase attack if effective
+            console.log(`Enemy attacks with ${attack} atk`);
+            userHealth = Math.max(userHealth - attack, 0);
+            console.log(`player health: ${userHealth}`);
+            if (userHealth === 0) {
+                //enemy wins the fight
+                console.log(`enemy wins`);
+                result.success = false;
+                result.currentHealth = userHealth;
+                fightOnGoing = false;
             }
         }
-
-
     }
 
-
-
+    return result;
 }
 module.exports = {
     data: new SlashCommandBuilder()
@@ -351,27 +361,26 @@ module.exports = {
                     //iterate through the three stages
                     combatStage++;
                     let stageEnemy = user.quest[0].enemies.find(x => x.stage === combatStage);
-                    console.log(`stage enemy: ${stageEnemy} at stage ${combatStage}`);
                     if (!stageEnemy) {
                         //no enemy at this stage
                     }
                     else {
                         //enemy at this stage
+                        console.log(`stage enemy: ${stageEnemy.unit} at stage ${combatStage}`);
                         const combatReport = await fightSimulator(user, stageEnemy);
                         if (!combatReport.success) {
                             //user lost fight
                             success = false;
                             user.status = "unconscious";
-                            combatStage = 4;
-                            break;
+                            user.status_time = Date.now() + 20 * 3600 * 1000;
                         }
                         //set health
                         user.unit.current_health = combatReport.currentHealth;
-                        if (user.unit.current_health <= 0) {
-                            success = false;
-                        }
 
-                        //get reward for this stage
+                        if (combatReport.success) {
+                            //get reward for this stage
+
+                        }
                     }
 
                 }
@@ -379,11 +388,10 @@ module.exports = {
 
                 //reset quest and status
                 user.quest = [];
-                user.status = "idle";
                 await user.save();
 
                 //send reply
-                await interaction.reply({ content: `You quest ended` });
+                await interaction.reply({ content: `Your quest ended` });
                 break;
             default:
                 //quest not available
