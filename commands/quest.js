@@ -11,6 +11,9 @@ const { getUnitLevel } = require('./../controller/unitLevel.js');
 
 const minDuration = 3600 //minimum duration of quests in seconds
 const durationPeriod = 36000 //period of quest duration in seconds
+const uncommonArtifactChance = 0.1;
+const rareArtifactChance = 0.2;
+const legendaryArtifactChance = 0.2;
 
 
 function readableTime(ms) {
@@ -110,7 +113,7 @@ async function createQuests(user) {
             }
         }
         else if (counter === 1) {
-            //make first quest of difficulty 1
+            //first quest has difficulty 1
             diff = 1;
         }
         if (userLevel < 10 && diff === 3) {
@@ -262,21 +265,6 @@ async function fightSimulator(user, enemy) {
         result = { success: true, currentHealth: user.unit.current_health };
         return result;
     }
-
-    /*
-        let healthOne = Math.round(baseEnemy.health * Math.pow(1.2, 0));
-        let attackOne = (Math.round((baseEnemy.maxAttack * Math.pow(1.2, 0) * 100) / 100 + (Math.round(baseEnemy.minAttack * Math.pow(1.2, 0) * 100) / 100))) / 2;
-        let strengthOne = healthOne * attackOne;
-        console.log(`level 1: health ${healthOne} * attack ${attackOne} = strength ${strengthOne}`);
-        let healthTwo = Math.round(baseEnemy.health * Math.pow(1.2, 1));
-        let attackTwo = (Math.round(baseEnemy.maxAttack * Math.pow(1.2, 1) * 100) / 100 + Math.round(baseEnemy.minAttack * Math.pow(1.2, 1) * 100) / 100) / 2;
-        let strengthTwo = healthTwo * attackTwo;
-        let healthThree = Math.round(baseEnemy.health * Math.pow(1.2, 2));
-        let attackThree = (Math.round(baseEnemy.maxAttack * Math.pow(1.2, 2) * 100) / 100 + Math.round(baseEnemy.minAttack * Math.pow(1.2, 2) * 100) / 100) / 2;
-        let strengthThree = healthThree * attackThree;
-    
-        console.log(`compare strength:\nlevel 1: ${strengthOne}\nlevel 2: ${strengthTwo}\nlevel 3: ${strengthThree}`);
-    */
 
     let userHealth = user.unit.current_health;
     let enemyHealth = Math.round(baseEnemy.health * Math.pow(1.2, enemy.level - 1));
@@ -440,12 +428,14 @@ module.exports = {
                 //get rewards
                 let combatStage = 0;
                 let success = true;
+                const rewards = { xp: 0, soulstone: 0, artifact: "" };
                 while (combatStage < 3 && success) {
                     //iterate through the three stages
                     combatStage++;
                     let stageEnemy = user.quest[0].enemies.find(x => x.stage === combatStage);
                     if (!stageEnemy) {
                         //no enemy at this stage
+                        console.log(`No enemy at stage ${combatStage}`);
                     }
                     else {
                         //enemy at this stage
@@ -457,20 +447,63 @@ module.exports = {
                             user.status = "unconscious";
                             user.status_time = Date.now() + 20 * 3600 * 1000;
                         }
-                        //set health
-                        user.unit.current_health = Math.round(combatReport.currentHealth);
-
-                        if (combatReport.success) {
+                        else {
                             //get reward for this stage
 
+                            let reward = (getRewards(user));
+                            rewards.xp = rewards.xp + reward.xp;
+                            rewards.soulstone = rewards.soulstone + reward.soulsone;
+                            questType = (await Quest.findOne({ title: user.quest.title }).exec()).type
+                            console.log(`rewards questtype: ${questType}`);
+                            if (combatStage === 3 && questType === "treasure hunter") {
+                                //check for artifact
+                                //formula: uncommonChance * (difficulty-1) * (duration/maxDuration + 1) 
+                                let uncommonChance = uncommonArtifactChance * (user.quest.difficulty - 1) * (user.quest.duration / (durationPeriod + minDuration) + 1);
+                                let artifactTier = 0;
+                                if (Math.random() < uncommonChance) {
+                                    console.log(`artifact t1`)
+                                    artifactTier = 1;
+                                    if (Math.random() < rareArtifactChance) {
+                                        console.log(`artifact t2`)
+                                        artifactTier = 2
+                                        if (Math.random() < legendaryArtifactChance) {
+                                            console.log(`artifact t3`)
+                                            artifactTier = 3;
+                                        }
+                                    }
+                                }
+                                if (artifactTier) {
+                                    //find random artifact
+                                    const artifacts = await Item.findMany({ consumable: false, effect: artifactTier }).exec();
+                                    for (let item in user.inventory) {
+                                        artifacts.forEach(artifact => {
+                                            if (artifact.name === item.item_name) {
+                                                //remove artifacts that are already in players posession
+                                                artifacts = artifacts.filter(a => a.name != artifact.name);
+                                            }
+                                        });
+                                    }
+                                    const artifactCounter = artifacts.length;
+                                    const random = Math.floor(Math.random() * artifactCounter);
+                                    rewardedArtifact = artifacts[random];
+                                    //add artifact to inventory
+                                    user.inventory.push({
+                                        item_name: rewardedArtifact.name,
+                                        amount: 1,
+                                        consumable: false
+                                    })
+                                    console.log(`added the item ${rewardedArtifact.name} to the inventory!`);
+                                }
+                            }
                         }
                     }
-
                 }
                 //create text
 
                 //reset quest and status
                 user.quest = [];
+                user.unit.current_health = Math.round(combatReport.currentHealth);
+
                 await user.save();
 
                 //send reply
