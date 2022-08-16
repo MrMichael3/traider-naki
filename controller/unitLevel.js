@@ -61,7 +61,6 @@ const levelUp = async (user, xpBefore, channel) => {
 
 
     if (lv <= previousLv && xpOfLevel(lv + 1) > xp) {
-        console.log(`error: ${user.username} lv ${lv} hasn't leveled up!`);
         return;
     }
     switch (user.unit.unit_type) {

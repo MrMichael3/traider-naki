@@ -192,7 +192,7 @@ async function createQuests(user) {
             }
             const enemy = unitData.wildCreatures.find(x => x.name === enemyType);
             const baseAttack = (enemy.minAttack + enemy.maxAttack) / 2;
-            let unitLvl = Math.min(50,Math.max(0, Math.floor(Math.log(powerPerStage[stage - 1] / (enemy.health * baseAttack)) / (2 * Math.log(statsMultiplierPercentage)) + 0.2) + 1)); //round up if >= xx.8
+            let unitLvl = Math.min(50, Math.max(0, Math.floor(Math.log(powerPerStage[stage - 1] / (enemy.health * baseAttack)) / (2 * Math.log(statsMultiplierPercentage)) + 0.2) + 1)); //round up if >= xx.8
             if (stage === 3 && createQuest.enemies.length === 0 && quest.type !== "exploration" && unitLvl === 0) {
                 //quests (eploration excluded) should have at least one enemy
                 unitLvl = 1;
@@ -266,10 +266,13 @@ function createQuestReportEmbed(user, description, healthBefore, rewards, stage)
     for (let c = 0; c < user.quest[0].difficulty; c++) {
         diffStars += emojis.battlepoint;
     }
+    //stage rewards
+    let stageSoulstone = rewards[stage - 1].baseSoulstone + rewards[stage - 1].combatSoulstone;
+    let stageXp = rewards[stage - 1].baseXp + rewards[stage - 1].combatXp;
     const userLvl = getUnitLevel(user.unit.xp);
-    let text = description.find(x=>x.stage === stage).text;
+    let text = description.find(x => x.stage === stage).text;
     let unitName = user.unit.unit_type.replace(/([A-Z])/g, ' $1');
-	unitName = unitName.charAt(0).toUpperCase() + unitName.slice(1);
+    unitName = unitName.charAt(0).toUpperCase() + unitName.slice(1);
     const reportEmbed = new MessageEmbed()
         .setTitle(`Quest Report`)
         .setDescription(`${user.quest[0].title} ${diffStars}`)
@@ -278,7 +281,7 @@ function createQuestReportEmbed(user, description, healthBefore, rewards, stage)
                 name: `Quest journey`, value: `${text}`,
             },
             {
-                name: `${unitName} lv ${userLvl}`, value: `health:   ${user.unit.current_health} *(-${healthBefore - user.unit.current_health})*\nattack:  ${user.unit.min_attack} - ${user.unit.max_attack}\nxp:     ${user.unit.xp + rewards.xp} *(+${rewards.xp})*\nsoulstone: ${user.soulstones + rewards.soulstone} *(+${rewards.soulstone})*`, inline: true
+                name: `${unitName} lv ${userLvl}`, value: `health:   ${user.unit.current_health} *(-${healthBefore - user.unit.current_health})*\nattack:  ${user.unit.min_attack} - ${user.unit.max_attack}\nxp:     ${user.unit.xp + stageXp} *(+${stageXp})*\nsoulstone: ${user.soulstones + stageSoulstone} *(+${stageSoulstone})*`, inline: true
             }
         );
     /*selectionEmbed.addField({
@@ -343,7 +346,6 @@ async function fightSimulator(user, enemy) {
 
 function getRewards(user, stage) {
     //get combat reward for certain stage
-    console.log(`get rewards for stage ${stage}`);
     try {
         var quest = user.quest[0];
     }
@@ -387,6 +389,8 @@ function getRewards(user, stage) {
 
 function createDescription(user, quest, stage, enemy, success, rewards) {
     let description = "";
+    const combatXp = rewards[stage - 1].combatXp;
+    const combatSoulstone = rewards[stage - 1].combatSoulstone;
     switch (quest.region) {
         case "Magic Marsh":
             switch (stage) {
@@ -395,10 +399,10 @@ function createDescription(user, quest, stage, enemy, success, rewards) {
                         description += "You are well prepared and start your journey towards the magic marsh island. After a short flight with your airship you land on a gloomy swamp. ";
                         if (enemy) {
                             if (enemy.unit === "Nyxi") {
-                                description += `But you didn't chose your landing spot carefully, instead landed directly on a nyxi nest. The nest is completely destroyed and you are looking into the eyes of an angry **level ${enemy.level} nyxi**. You defeat the wild nyxi and get ${rewards.xp} xp and find ${rewards.soulstone} soulstones in the destroyed nest. What a begin into this journey! `;
+                                description += `But you didn't chose your landing spot carefully, instead landed directly on a nyxi nest. The nest is completely destroyed and you are looking into the eyes of an angry **level ${enemy.level} nyxi**. You defeat the wild nyxi and get ${combatXp} xp and find ${combatSoulstone} soulstones in the destroyed nest. What a begin into this journey! `;
                             }
                             else {
-                                description += `You are discovering the beautiful nature as you wander throught the marsh. On the flight here, you have read a lot about meeting and fighting wild nyxis, but you can't see any wildlife. Suddenly, a rustling in the bushes. You are alarmed, ready to fight. But the wild creatures who appears is not a nyxi, but a more dangerous **level ${enemy.level} Pangoan**!. There is no way of escape, so you decides it's best to directly attack the creature. Your bravery shall be rewarded. The Pangoan has no chance and you get ${rewards.xp} xp for killing it and finds ${rewards.soulstone} soulstone too. `;
+                                description += `You are discovering the beautiful nature as you wander throught the marsh. On the flight here, you have read a lot about meeting and fighting wild nyxis, but you can't see any wildlife. Suddenly, a rustling in the bushes. You are alarmed, ready to fight. But the wild creatures who appears is not a nyxi, but a more dangerous **level ${enemy.level} Pangoan**!. There is no way of escape, so you decides it's best to directly attack the creature. Your bravery shall be rewarded. The Pangoan has no chance and you get ${combatXp} xp for killing it and finds ${combatSoulstone} soulstone too. `;
                             }
                         }
                         else {
@@ -421,10 +425,10 @@ function createDescription(user, quest, stage, enemy, success, rewards) {
                         description += `On the second stage of the journey you march through the swamp, enjoying the wild nature around you. But the march is also exhausting and you are looking forward to drying your wet feet at the campfire. `;
                         if (enemy) {
                             if (enemy.unit === "Nyxi") {
-                                description += `Dusk is already coming when you suddenly see a horde of nyxis at a near river. You decide to not disturb them and quietly walks a few steps back. Unfortunately, a single **level ${enemy.level} nyxi** became aware of you and quickly hops towards you. After a short fight, you can defeat the nyxi and gets rewarded with ${rewards.xp} xp and ${rewards.soulstone} soulstone. Now you truly deserve some rest at the campfire with some roasted nyxi legs. `;
+                                description += `Dusk is already coming when you suddenly see a horde of nyxis at a near river. You decide to not disturb them and quietly walks a few steps back. Unfortunately, a single **level ${enemy.level} nyxi** became aware of you and quickly hops towards you. After a short fight, you can defeat the nyxi and gets rewarded with ${combatXp} xp and ${combatSoulstone} soulstone. Now you truly deserve some rest at the campfire with some roasted nyxi legs. `;
                             }
                             else {
-                                description += `Dusk is already coming when you suddenly see a horde of nyxis at a near river. You decide to not disturb them and quietly walks a few steps back. Unfortunately, on your way around the nyxi horde you pass a wild **level ${enemy.level} pangoan**. In a fierce battle, you gain the upper hand and finish off the pangoan. You get rewarded with ${rewards.xp} xp and ${rewards.soulstone} soulstone. You never ate pangoan before, but you sure it will make a great dinner tonight. `;
+                                description += `Dusk is already coming when you suddenly see a horde of nyxis at a near river. You decide to not disturb them and quietly walks a few steps back. Unfortunately, on your way around the nyxi horde you pass a wild **level ${enemy.level} pangoan**. In a fierce battle, you gain the upper hand and finish off the pangoan. You get rewarded with ${combatXp} xp and ${combatSoulstone} soulstone. You never ate pangoan before, but you sure it will make a great dinner tonight. `;
                             }
                         }
                         else {
@@ -448,10 +452,10 @@ function createDescription(user, quest, stage, enemy, success, rewards) {
                         description += `You finally reach the magic forest. Amazing flora awaits you and a hint of soulstone magic hangs in the air. As you get deeper into the forest, you watch carefully the nature spectacle around you. `;
                         if (enemy) {
                             if (enemy.unit === "Nyxi") {
-                                description += `The forest is full of life. Smaller and bigger creatures, crawling, walking and flying, enliven the forest, however you rarely see on the shy creatures. As you spot some nyxis in the undergrowth, you decide to hunt one of those wild creatures. You sneak up on a **level ${enemy.level} nyxi** and attack directly. After a short fight, the nyxi lays dead at your feet and you get rewarded with ${rewards.xp} xp and ${rewards.soulstone} soulstone. `;
+                                description += `The forest is full of life. Smaller and bigger creatures, crawling, walking and flying, enliven the forest, however you rarely see on the shy creatures. As you spot some nyxis in the undergrowth, you decide to hunt one of those wild creatures. You sneak up on a **level ${enemy.level} nyxi** and attack directly. After a short fight, the nyxi lays dead at your feet and you get rewarded with ${combatXp} xp and ${combatSoulstone} soulstone. `;
                             }
                             else {
-                                description += `The forest is full of life. Smaller and bigger creatures, crawling, walking and flying, enliven the forest, however you rarely see on the shy creatures. As you spot a single pangoan in the undergrowth, you decide to hunt this wild creature. You sneak up on the **level ${enemy.level} pangoan** and attack directly. After an intense fight, the pangoan lays dead at your feet and you get rewarded with ${rewards.xp} xp and ${rewards.soulstone} soulstone. `;
+                                description += `The forest is full of life. Smaller and bigger creatures, crawling, walking and flying, enliven the forest, however you rarely see on the shy creatures. As you spot a single pangoan in the undergrowth, you decide to hunt this wild creature. You sneak up on the **level ${enemy.level} pangoan** and attack directly. After an intense fight, the pangoan lays dead at your feet and you get rewarded with ${combatXp} xp and ${combatSoulstone} soulstone. `;
                             }
                         }
                         else {
@@ -478,10 +482,10 @@ function createDescription(user, quest, stage, enemy, success, rewards) {
                         description += `It's a long flight with your airship to the mysterious wasteland island. You land on an abandoned place in the middle of the wasteland. `;
                         if (enemy) {
                             if (enemy.unit === "Pangoan") {
-                                description += `The wasteland is hot and dreary, but you keep traveling through it. behind a small hill, you can spot some wild pangoans and decide to hunt one. A moment later, you are face-to-face with a huge **level ${enemy.level} pangoan**. After a intense fight, you defeat the pangoan and gets rewarded with ${rewards.xp} xp and ${rewards.soulstone} soulstone. `;
+                                description += `The wasteland is hot and dreary, but you keep traveling through it. behind a small hill, you can spot some wild pangoans and decide to hunt one. A moment later, you are face-to-face with a huge **level ${enemy.level} pangoan**. After a intense fight, you defeat the pangoan and gets rewarded with ${combatXp} xp and ${combatSoulstone} soulstone. `;
                             }
                             else {
-                                description += `The wasteland is hot and dreary, but you keep traveling through it. behind a small hill, you can spot some wild ranax and decide to hunt one. A moment later, you are face-to-face with a huge **level ${enemy.level} ranax**. After a intense fight, you defeat the ranax and gets rewarded with ${rewards.xp} xp and ${rewards.soulstone} soulstone. `;
+                                description += `The wasteland is hot and dreary, but you keep traveling through it. behind a small hill, you can spot some wild ranax and decide to hunt one. A moment later, you are face-to-face with a huge **level ${enemy.level} ranax**. After a intense fight, you defeat the ranax and gets rewarded with ${combatXp} xp and ${combatSoulstone} soulstone. `;
                             }
                         }
                         else {
@@ -504,10 +508,10 @@ function createDescription(user, quest, stage, enemy, success, rewards) {
                         description += `You continue your journey through the island. `;
                         if (enemy) {
                             if (enemy.unit === "Pangoan") {
-                                description += `The wasteland is hot and dreary, but you keep traveling through it. behind a small hill, you can spot some wild pangoans and decide to hunt one. A moment later, you are face-to-face with a huge **level ${enemy.level} pangoan**. After a intense fight, you defeat the pangoan and gets rewarded with ${rewards.xp} xp and ${rewards.soulstone} soulstone. `;
+                                description += `The wasteland is hot and dreary, but you keep traveling through it. behind a small hill, you can spot some wild pangoans and decide to hunt one. A moment later, you are face-to-face with a huge **level ${enemy.level} pangoan**. After a intense fight, you defeat the pangoan and gets rewarded with ${combatXp} xp and ${combatSoulstone} soulstone. `;
                             }
                             else {
-                                description += `The wasteland is hot and dreary, but you keep traveling through it. behind a small hill, you can spot some wild ranax and decide to hunt one. A moment later, you are face-to-face with a huge **level ${enemy.level} ranax**. After a intense fight, you defeat the ranax and gets rewarded with ${rewards.xp} xp and ${rewards.soulstone} soulstone. `;
+                                description += `The wasteland is hot and dreary, but you keep traveling through it. behind a small hill, you can spot some wild ranax and decide to hunt one. A moment later, you are face-to-face with a huge **level ${enemy.level} ranax**. After a intense fight, you defeat the ranax and gets rewarded with ${combatXp} xp and ${combatSoulstone} soulstone. `;
                             }
                         }
                         else {
@@ -529,10 +533,10 @@ function createDescription(user, quest, stage, enemy, success, rewards) {
                         description += `You continue your journey through the island. `;
                         if (enemy) {
                             if (enemy.unit === "Pangoan") {
-                                description += `The wasteland is hot and dreary, but you keep traveling through it. behind a small hill, you can spot some wild pangoans and decide to hunt one. A moment later, you are face-to-face with a huge **level ${enemy.level} pangoan**. After a intense fight, you defeat the pangoan and gets rewarded with ${rewards.xp} xp and ${rewards.soulstone} soulstone. `;
+                                description += `The wasteland is hot and dreary, but you keep traveling through it. behind a small hill, you can spot some wild pangoans and decide to hunt one. A moment later, you are face-to-face with a huge **level ${enemy.level} pangoan**. After a intense fight, you defeat the pangoan and gets rewarded with ${combatXp} xp and ${combatSoulstone} soulstone. `;
                             }
                             else {
-                                description += `The wasteland is hot and dreary, but you keep traveling through it. behind a small hill, you can spot some wild ranax and decide to hunt one. A moment later, you are face-to-face with a huge **level ${enemy.level} ranax**. After a intense fight, you defeat the ranax and gets rewarded with ${rewards.xp} xp and ${rewards.soulstone} soulstone. `;
+                                description += `The wasteland is hot and dreary, but you keep traveling through it. behind a small hill, you can spot some wild ranax and decide to hunt one. A moment later, you are face-to-face with a huge **level ${enemy.level} ranax**. After a intense fight, you defeat the ranax and gets rewarded with ${combatXp} xp and ${combatSoulstone} soulstone. `;
                             }
                         }
                         else {
@@ -558,10 +562,10 @@ function createDescription(user, quest, stage, enemy, success, rewards) {
                         description += "It's a very long flight to the far away dark desert island. The island is mainly undiscovered and very dangerous. You walk carefully on the hot ash fields and looking around with every sound you hear. ";
                         if (enemy) {
                             if (enemy.unit === "Ranax") {
-                                description += `After travelling through the region, you begin to see the beauty of this rough, abandoned but still impressive nature. But only a short moment of inattention was enough and you get chased by an dangerous wild ranax! As you have no place to hide, you decide to try your luck and fight the **level ${enemy.level} ranax**. The ranax fights relentlessly but at the end, you are stronger and win the fight. You get rewarded with ${rewards.xp} xp and ${rewards.soulstone} soulstone. `;
+                                description += `After travelling through the region, you begin to see the beauty of this rough, abandoned but still impressive nature. But only a short moment of inattention was enough and you get chased by an dangerous wild ranax! As you have no place to hide, you decide to try your luck and fight the **level ${enemy.level} ranax**. The ranax fights relentlessly but at the end, you are stronger and win the fight. You get rewarded with ${combatXp} xp and ${combatSoulstone} soulstone. `;
                             }
                             else {
-                                description += `After travelling through the region, you begin to see the beauty of this rough, abandoned but still impressive nature. But only a short moment of inattention was enough and you get chased by a mighty athlas! As you have no place to hide, you decide to try your luck and fight the **level ${enemy.level} athlas**. The athlas fights relentlessly but at the end, you are stronger and win the fight. You get rewarded with ${rewards.xp} xp and ${rewards.soulstone} soulstone. `;
+                                description += `After travelling through the region, you begin to see the beauty of this rough, abandoned but still impressive nature. But only a short moment of inattention was enough and you get chased by a mighty athlas! As you have no place to hide, you decide to try your luck and fight the **level ${enemy.level} athlas**. The athlas fights relentlessly but at the end, you are stronger and win the fight. You get rewarded with ${combatXp} xp and ${combatSoulstone} soulstone. `;
                             }
                         }
                         else {
@@ -584,10 +588,10 @@ function createDescription(user, quest, stage, enemy, success, rewards) {
                         description += "You continue your journey through the ash fields. ";
                         if (enemy) {
                             if (enemy.unit === "Ranax") {
-                                description += `After travelling through the region, you begin to see the beauty of this rough, abandoned but still impressive nature. But only a short moment of inattention was enough and you get chased by an dangerous wild ranax! As you have no place to hide, you decide to try your luck and fight the **level ${enemy.level} ranax**. The ranax fights relentlessly but at the end, you are stronger and win the fight. You get rewarded with ${rewards.xp} xp and ${rewards.soulstone} soulstone. `;
+                                description += `After travelling through the region, you begin to see the beauty of this rough, abandoned but still impressive nature. But only a short moment of inattention was enough and you get chased by an dangerous wild ranax! As you have no place to hide, you decide to try your luck and fight the **level ${enemy.level} ranax**. The ranax fights relentlessly but at the end, you are stronger and win the fight. You get rewarded with ${combatXp} xp and ${combatSoulstone} soulstone. `;
                             }
                             else {
-                                description += `After travelling through the region, you begin to see the beauty of this rough, abandoned but still impressive nature. But only a short moment of inattention was enough and you get chased by a mighty athlas! As you have no place to hide, you decide to try your luck and fight the **level ${enemy.level} athlas**. The athlas fights relentlessly but at the end, you are stronger and win the fight. You get rewarded with ${rewards.xp} xp and ${rewards.soulstone} soulstone. `;
+                                description += `After travelling through the region, you begin to see the beauty of this rough, abandoned but still impressive nature. But only a short moment of inattention was enough and you get chased by a mighty athlas! As you have no place to hide, you decide to try your luck and fight the **level ${enemy.level} athlas**. The athlas fights relentlessly but at the end, you are stronger and win the fight. You get rewarded with ${combatXp} xp and ${combatSoulstone} soulstone. `;
                             }
                         }
                         else {
@@ -610,10 +614,10 @@ function createDescription(user, quest, stage, enemy, success, rewards) {
                         description += "You continue your journey through the ash fields. ";
                         if (enemy) {
                             if (enemy.unit === "Ranax") {
-                                description += `After travelling through the region, you begin to see the beauty of this rough, abandoned but still impressive nature. But only a short moment of inattention was enough and you get chased by an dangerous wild ranax! As you have no place to hide, you decide to try your luck and fight the **level ${enemy.level} ranax**. The ranax fights relentlessly but at the end, you are stronger and win the fight. You get rewarded with ${rewards.xp} xp and ${rewards.soulstone} soulstone. `;
+                                description += `After travelling through the region, you begin to see the beauty of this rough, abandoned but still impressive nature. But only a short moment of inattention was enough and you get chased by an dangerous wild ranax! As you have no place to hide, you decide to try your luck and fight the **level ${enemy.level} ranax**. The ranax fights relentlessly but at the end, you are stronger and win the fight. You get rewarded with ${combatXp} xp and ${combatSoulstone} soulstone. `;
                             }
                             else {
-                                description += `After travelling through the region, you begin to see the beauty of this rough, abandoned but still impressive nature. But only a short moment of inattention was enough and you get chased by a mighty athlas! As you have no place to hide, you decide to try your luck and fight the **level ${enemy.level} athlas**. The athlas fights relentlessly but at the end, you are stronger and win the fight. You get rewarded with ${rewards.xp} xp and ${rewards.soulstone} soulstone. `;
+                                description += `After travelling through the region, you begin to see the beauty of this rough, abandoned but still impressive nature. But only a short moment of inattention was enough and you get chased by a mighty athlas! As you have no place to hide, you decide to try your luck and fight the **level ${enemy.level} athlas**. The athlas fights relentlessly but at the end, you are stronger and win the fight. You get rewarded with ${combatXp} xp and ${combatSoulstone} soulstone. `;
                             }
                         }
                         else {
@@ -707,7 +711,7 @@ module.exports = {
                     //set status and status time
                     user.status = "atQuest";
                     user.status_time = Date.now()// + user.quest[0].duration * 1000;  REMOVE '//' TO WORK PROPERLY
-                    
+
                     //reply
                     await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
                     await user.save();
@@ -752,7 +756,7 @@ module.exports = {
                 //calculate fight
                 let combatStage = 0;
                 let success = true;
-                const rewards = { xp: 0, soulstone: 0, artifact: "" };
+                const rewards = [];
                 const stageDescriptions = []
                 let healthBeforeQuest = user.unit.current_health;
                 const embedReport = [] //store embeds of the quest report per stage
@@ -762,12 +766,14 @@ module.exports = {
                     combatStage++;
                     let stageEnemy = user.quest[0].enemies.find(x => x.stage === combatStage);
                     let userLvl = getUnitLevel(user.unit.xp);
-                    rewards.soulstone = rewards.soulstone + Math.round((10 * (user.quest[0].duration / (durationPeriod + minDuration) * user.quest[0].difficulty)) / 3);
-                    rewards.xp = rewards.xp + Math.round((10 * Math.pow(1.1, userLvl)) / 3);
+                    //base rewards per stage
+                    let baseSoulstone = Math.round((10 * (user.quest[0].duration / (durationPeriod + minDuration) * user.quest[0].difficulty)) / 3);
+                    let baseXp = Math.round((10 * Math.pow(1.1, userLvl)) / 3);
+                    let stageRewards = { baseSoulstone: baseSoulstone, baseXp: baseXp,combatSoulstone: 0, combatXp: 0 , artifact: "" };
+
                     const currentQuest = await Quest.findOne({ title: user.quest[0].title }).exec();
                     if (stageEnemy) {
                         //enemy at this stage
-                        console.log(`stage enemy: ${stageEnemy.unit} ${stageEnemy.level} at stage ${combatStage}`);
                         const combatReport = await fightSimulator(user, stageEnemy);
                         user.unit.current_health = Math.round(combatReport.currentHealth);
 
@@ -779,9 +785,9 @@ module.exports = {
                         }
                         else {
                             //get reward for this stage
-                            let reward = (getRewards(user, combatStage));
-                            rewards.xp = rewards.xp + reward.xp;
-                            rewards.soulstone = rewards.soulstone + reward.soulstone;
+                            var combatRewards = getRewards(user, combatStage);
+                            stageRewards.combatSoulstone= combatRewards.soulstone;
+                            stageRewards.combatXp= combatRewards.xp;
                             //artifact reward
                             questType = currentQuest.type;
                             if (combatStage === 3 && questType === "treasure hunter") {
@@ -813,8 +819,8 @@ module.exports = {
                                     }
                                     const artifactCounter = artifacts.length;
                                     const random = Math.floor(Math.random() * artifactCounter);
-                                    rewardedArtifact = artifacts[random];
-                                    rewards.artifact = rewardedArtifact.name;
+                                    const rewardedArtifact = artifacts[random];
+                                    stageRewards.artifact = rewardedArtifact;
                                     //add artifact to inventory
                                     user.inventory.push({
                                         item_name: rewardedArtifact.name,
@@ -824,6 +830,8 @@ module.exports = {
                                 }
                             }
                         }
+                        //add reward of this stage
+                        rewards.push(stageRewards);
                     }
                     //create description
                     let description = { stage: combatStage, text: "", success: success };
@@ -840,14 +848,24 @@ module.exports = {
                     user.status = "idle";
                 }
                 const xpBefore = user.unit.xp;
-                user.unit.xp += rewards.xp;
-                user.soulstones += rewards.soulstone;
+                let totalXpReward = 0;
+                let totalSoulstoneReward = 0;
+                for (stage of rewards) {
+                    totalSoulstoneReward += stage.baseSoulstone + stage.combatSoulstone;
+                    console.log(stage.baseXp);
+                    console.log(stage.combatXp);
+                    totalXpReward += stage.baseXp + stage.combatXp;
+                }
+                console.log(`check xp: ${totalXpReward}`);
+                user.unit.xp += totalXpReward;
+                user.soulstones += totalSoulstoneReward;
                 await user.save();
                 await levelUp(user, xpBefore, interaction.channel);
 
                 //send reply
+                console.log(`rewards:\n${JSON.stringify(rewards)}`);
                 await interaction.reply({ content: `Your quest ended`, embeds: embedReport[0] });
-                await interaction.followUp({embeds:embedReport[1] })
+                await interaction.followUp({ embeds: embedReport[1] })
                 break;
             default:
                 //quest not available
