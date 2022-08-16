@@ -8,6 +8,7 @@ const baseXp = 350 //xp for level 0;
 const multiplier = 1.2;
 const levelOne = 0; //xp needed for first lv up
 const statsMultiplier = 10; //increase health and attack per level
+const maxLevel = 50; //highest level a user can get
 
 function createEmbeds(userBefore, userAfter) {
     const embeds = [];
@@ -36,6 +37,9 @@ const getUnitLevel = (xp) => {
     //calculate level, each unit has same xp rate, min lv: 1
     if (xp < levelOne) {
         return 1;
+    }
+    if(xp > xpOfLevel(50)){
+        return 50;
     }
     return (Math.floor(Math.log((baseXp + xp) / baseXp) / Math.log(multiplier)) + 1);
 }

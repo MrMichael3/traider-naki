@@ -192,8 +192,7 @@ async function createQuests(user) {
             }
             const enemy = unitData.wildCreatures.find(x => x.name === enemyType);
             const baseAttack = (enemy.minAttack + enemy.maxAttack) / 2;
-            let unitLvl = Math.max(0, Math.floor(Math.log(powerPerStage[stage - 1] / (enemy.health * baseAttack)) / (2 * Math.log(statsMultiplierPercentage)) + 0.2) + 1); //round up if >= xx.8
-            //const unitLvl = Math.max(0, Math.floor(Math.log(powerPerStage[stage - 1] / (enemy.health * baseAttack)) / (2 * Math.log(statsMultiplier))) + 1);
+            let unitLvl = Math.min(50,Math.max(0, Math.floor(Math.log(powerPerStage[stage - 1] / (enemy.health * baseAttack)) / (2 * Math.log(statsMultiplierPercentage)) + 0.2) + 1)); //round up if >= xx.8
             if (stage === 3 && createQuest.enemies.length === 0 && quest.type !== "exploration" && unitLvl === 0) {
                 //quests (eploration excluded) should have at least one enemy
                 unitLvl = 1;
@@ -256,7 +255,38 @@ async function createSelectionEmbed(user) {
     embeds.push(selectionEmbed);
     return embeds;
 }
-
+function createQuestReportEmbed(user, description, healthBefore, rewards, stage) {
+    if (user.quest.length !== 1) {
+        console.log(`Error at creating quest report: quest missing`);
+        return [];
+    }
+    const embeds = [];
+    //difficulty icons
+    let diffStars = "";
+    for (let c = 0; c < user.quest[0].difficulty; c++) {
+        diffStars += emojis.battlepoint;
+    }
+    const userLvl = getUnitLevel(user.unit.xp);
+    let text = description.find(x=>x.stage === stage).text;
+    let unitName = user.unit.unit_type.replace(/([A-Z])/g, ' $1');
+	unitName = unitName.charAt(0).toUpperCase() + unitName.slice(1);
+    const reportEmbed = new MessageEmbed()
+        .setTitle(`Quest Report`)
+        .setDescription(`${user.quest[0].title} ${diffStars}`)
+        .addFields(
+            {
+                name: `Quest journey`, value: `${text}`,
+            },
+            {
+                name: `${unitName} lv ${userLvl}`, value: `health:   ${user.unit.current_health} *(-${healthBefore - user.unit.current_health})*\nattack:  ${user.unit.min_attack} - ${user.unit.max_attack}\nxp:     ${user.unit.xp + rewards.xp} *(+${rewards.xp})*\nsoulstone: ${user.soulstones + rewards.soulstone} *(+${rewards.soulstone})*`, inline: true
+            }
+        );
+    /*selectionEmbed.addField({
+        name: `extra added enemy`, value: `health: --\nattack: 1-2`, inline: true
+    });*/
+    embeds.push(reportEmbed);
+    return embeds;
+}
 async function fightSimulator(user, enemy) {
     //computes the result of two units fighting each other
     //formula: health = baseHealth (lv1) * ((100+20)/100)^level
@@ -676,7 +706,8 @@ module.exports = {
                     user.quest = [user.quest[chosenQuest]];
                     //set status and status time
                     user.status = "atQuest";
-                    user.status_time = Date.now() + user.quest[0].duration * 1000;
+                    user.status_time = Date.now()// + user.quest[0].duration * 1000;  REMOVE '//' TO WORK PROPERLY
+                    
                     //reply
                     await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
                     await user.save();
@@ -723,6 +754,9 @@ module.exports = {
                 let success = true;
                 const rewards = { xp: 0, soulstone: 0, artifact: "" };
                 const stageDescriptions = []
+                let healthBeforeQuest = user.unit.current_health;
+                const embedReport = [] //store embeds of the quest report per stage
+
                 while (combatStage < 3 && success) {
                     //iterate through the three stages
                     combatStage++;
@@ -735,13 +769,13 @@ module.exports = {
                         //enemy at this stage
                         console.log(`stage enemy: ${stageEnemy.unit} ${stageEnemy.level} at stage ${combatStage}`);
                         const combatReport = await fightSimulator(user, stageEnemy);
-                        user.unit.current_health = combatReport.currentHealth;
+                        user.unit.current_health = Math.round(combatReport.currentHealth);
 
                         if (!combatReport.success) {
                             //user lost fight
                             success = false;
                             user.status = "unconscious";
-                            user.status_time = Date.now() + 20 * 3600 * 1000;
+                            user.status_time = Date.now() //+ 20 * 3600 * 1000; REMOVE '//' TO WORK PROPERLY
                         }
                         else {
                             //get reward for this stage
@@ -795,11 +829,11 @@ module.exports = {
                     let description = { stage: combatStage, text: "", success: success };
                     description.text = createDescription(user, currentQuest, combatStage, stageEnemy, success, rewards);
                     stageDescriptions.push(description);
+                    //create embed
+                    const stageEmbed = createQuestReportEmbed(user, stageDescriptions, healthBeforeQuest, rewards, combatStage)
+                    embedReport.push(stageEmbed);
 
                 }
-                console.log(`all rewards:\nxp: ${rewards.xp}, soulstone: ${rewards.soulstone}, artifact: ${rewards.artifact}.`)
-                //create text
-
                 //reset quest and status and save rewards
                 user.quest = [];
                 if (user.status === "endQuest") {
@@ -812,7 +846,8 @@ module.exports = {
                 await levelUp(user, xpBefore, interaction.channel);
 
                 //send reply
-                await interaction.reply({ content: `Your quest ended` });
+                await interaction.reply({ content: `Your quest ended`, embeds: embedReport[0] });
+                await interaction.followUp({embeds:embedReport[1] })
                 break;
             default:
                 //quest not available
