@@ -100,4 +100,4 @@ const levelUp = async (user, xpBefore, channel) => {
     }
     return;
 }
-module.exports = { getUnitLevel, levelUp, xpOfLevel };
+module.exports = { getUnitLevel, levelUp, xpOfLevel, statsMultiplier };
