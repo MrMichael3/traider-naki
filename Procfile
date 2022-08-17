@@ -1,1 +1,1 @@
-web: node botmain.js
+worker: npm start
