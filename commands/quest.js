@@ -4,7 +4,7 @@ const Item = require('./../schemas/Item.js');
 const Quest = require('./../schemas/Quest.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const unitData = require('./../unitStats.json');
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { MessageEmbed, MessageActionRow, MessageButton, EmbedBuilder } = require('discord.js');
 const emojis = require('./../emojis.json');
 const { getUnitLevel, statsMultiplier, levelUp } = require('./../controller/unitLevel.js');
 
@@ -203,7 +203,6 @@ async function createQuests(user) {
             stage++;
         }
         //add complete quest to the list of quests
-        console.log(`units: ${JSON.stringify(createQuest.enemies)}\n`);
         quests.push(createQuest);
 
     }
@@ -255,7 +254,7 @@ async function createSelectionEmbed(user) {
     embeds.push(selectionEmbed);
     return embeds;
 }
-function createQuestReportEmbed(user, description, healthBefore, rewards, stage) {
+function createQuestReportEmbed(user, description, healthBefore,results, rewards, stage) {
     if (user.quest.length !== 1) {
         console.log(`Error at creating quest report: quest missing`);
         return [];
@@ -273,6 +272,17 @@ function createQuestReportEmbed(user, description, healthBefore, rewards, stage)
     let text = description.find(x => x.stage === stage).text;
     let unitName = user.unit.unit_type.replace(/([A-Z])/g, ' $1');
     unitName = unitName.charAt(0).toUpperCase() + unitName.slice(1);
+
+    //stage enemy
+    const enemy = user.quest[0].enemies.find(x => x.stage === stage);
+    let enemyDescription = "-";
+    let enemyTitle = "-";
+    if (enemy) {
+        var enemyName = enemy.unit;
+        var enemyLevel = enemy.level;
+        enemyTitle = `${enemyName} lv ${enemyLevel}`;
+        enemyDescription = `Health: ${results.enemy.currentHealth}/${results.enemy.maxHealth}\nAttack: ${results.enemy.minAttack} - ${results.enemy.maxAttack}`;
+    }
     const reportEmbed = new MessageEmbed()
         .setTitle(`Quest Report`)
         .setDescription(`${user.quest[0].title} ${diffStars}`)
@@ -281,13 +291,63 @@ function createQuestReportEmbed(user, description, healthBefore, rewards, stage)
                 name: `Quest journey`, value: `${text}`,
             },
             {
-                name: `${unitName} lv ${userLvl}`, value: `health:   ${user.unit.current_health} *(-${healthBefore - user.unit.current_health})*\nattack:  ${user.unit.min_attack} - ${user.unit.max_attack}\nxp:     ${user.unit.xp + stageXp} *(+${stageXp})*\nsoulstone: ${user.soulstones + stageSoulstone} *(+${stageSoulstone})*`, inline: true
-            }
+                name: `${unitName} lv ${userLvl}`, value: `Health:   ${user.unit.current_health}/${user.unit.max_health}\nAttack:  ${user.unit.min_attack} - ${user.unit.max_attack}\n`, inline: true
+            },
+            { name: enemyTitle, value: enemyDescription, inline: true }
         );
-    /*selectionEmbed.addField({
-        name: `extra added enemy`, value: `health: --\nattack: 1-2`, inline: true
-    });*/
+
     embeds.push(reportEmbed);
+    return embeds;
+}
+
+function createReportSummaryEmbed(user, rewards) {
+    //difficulty icons
+    let diffStars = "";
+    for (let c = 0; c < user.quest[0].difficulty; c++) {
+        diffStars += emojis.battlepoint;
+    }
+    let status = "**quest completed**";
+    if (user.status === "unconscious") {
+        status = "**quest failed**\nLuckily a stranger found and rescued you. You need **20 hours** to recover. A special potion in the shop may help you regenerate faster.";
+    }
+    let xpReward = 0;
+    let soulstoneReward = 0;
+    let artifactReward = "-";
+    let defeatedEnemies = "-";
+
+    //set rewards
+    let stageCounter = 1;
+    for (stage of rewards) {
+        //set xp, soulstone and artifact reward per stage and add defeated enemy
+        xpReward += stage.baseXp + stage.combatXp;
+        soulstoneReward += stage.baseSoulstone + stage.combatSoulstone;
+        if (stage.artifact != "") {
+            artifactReward = stage.artifact
+        }
+        if (stage.success) {
+            const enemy = user.quest[0].enemies.find(x => x.stage === stageCounter);
+            if (enemy) {
+                if (defeatedEnemies === "-") {
+                    defeatedEnemies = `${enemy.unit}, level ${enemy.level}`;
+                }
+                else {
+                    defeatedEnemies = defeatedEnemies + `\n${enemy.unit}, level ${enemy.level}`;
+                }
+            }
+        }
+        stageCounter++;
+    }
+    const embeds = [];
+    const summaryEmbed = new MessageEmbed()
+        .setTitle(`Quest Report`)
+        .setDescription(`${user.quest[0].title} ${diffStars}`)
+        .addFields(
+            { name: `Status`, value: status },
+            { name: `Your stats`, value: `Health: ${user.unit.current_health}/${user.unit.max_health}${emojis.defensive}\nAttack: ${user.unit.min_attack}${emojis.offensive} - ${user.unit.max_attack}${emojis.offensive}\nXP: ${user.unit.xp}`, inline: true },
+            { name: 'Rewards', value: `Xp: ${xpReward}\nSoulstone: ${soulstoneReward}${emojis.soulstone}\nArtifact: ${artifactReward}`, inline: true },
+            { name: 'Defeated enemies', value: defeatedEnemies, inline: true }
+        );
+    embeds.push(summaryEmbed);
     return embeds;
 }
 async function fightSimulator(user, enemy) {
@@ -306,6 +366,10 @@ async function fightSimulator(user, enemy) {
     let enemyHealth = Math.round(baseEnemy.health * Math.pow(statsMultiplierPercentage, enemy.level - 1));
     let enemyAttack = [Math.round(baseEnemy.minAttack * Math.pow(statsMultiplierPercentage, enemy.level - 1) * 100) / 100, Math.round(baseEnemy.maxAttack * Math.pow(statsMultiplierPercentage, enemy.level - 1) * 100) / 100];
     let playerAttacks = Math.round(Math.random()); //boolean if player attacks first
+    result.enemy = {};
+    result.enemy.maxHealth = enemyHealth;
+    result.enemy.minAttack = enemyAttack[0];
+    result.enemy.maxAttack = enemyAttack[1];
     let c = 0;
     let fightOnGoing = true;
     while (fightOnGoing) {
@@ -322,6 +386,7 @@ async function fightSimulator(user, enemy) {
                 //player wins the fight
                 result.success = true;
                 result.currentHealth = userHealth;
+                result.enemy.currentHealth = enemyHealth;
                 fightOnGoing = false;
                 //TODO: WIN
             }
@@ -336,6 +401,7 @@ async function fightSimulator(user, enemy) {
                 //enemy wins the fight
                 result.success = false;
                 result.currentHealth = userHealth;
+                result.enemy.currentHealth = enemyHealth;
                 fightOnGoing = false;
             }
         }
@@ -389,8 +455,10 @@ function getRewards(user, stage) {
 
 function createDescription(user, quest, stage, enemy, success, rewards) {
     let description = "";
-    const combatXp = rewards[stage - 1].combatXp;
-    const combatSoulstone = rewards[stage - 1].combatSoulstone;
+    if (enemy) {
+        var combatXp = rewards[stage - 1].combatXp;
+        var combatSoulstone = rewards[stage - 1].combatSoulstone;
+    }
     switch (quest.region) {
         case "Magic Marsh":
             switch (stage) {
@@ -705,7 +773,6 @@ module.exports = {
                 });
                 collector.on('collect', async i => {
                     const chosenQuest = Number(i.customId);
-                    console.log(`chose Quest ${chosenQuest}`);
                     //delete the other quests
                     user.quest = [user.quest[chosenQuest]];
                     //set status and status time
@@ -767,27 +834,29 @@ module.exports = {
                     let stageEnemy = user.quest[0].enemies.find(x => x.stage === combatStage);
                     let userLvl = getUnitLevel(user.unit.xp);
                     //base rewards per stage
-                    let baseSoulstone = Math.round((10 * (user.quest[0].duration / (durationPeriod + minDuration) * user.quest[0].difficulty)) / 3);
+                    let baseSoulstone = Math.round((100 * (user.quest[0].duration / (durationPeriod + minDuration) * user.quest[0].difficulty)) / 3);
                     let baseXp = Math.round((10 * Math.pow(1.1, userLvl)) / 3);
-                    let stageRewards = { baseSoulstone: baseSoulstone, baseXp: baseXp,combatSoulstone: 0, combatXp: 0 , artifact: "" };
+                    let stageRewards = { baseSoulstone: baseSoulstone, baseXp: baseXp, combatSoulstone: 0, combatXp: 0, artifact: "", success: true };
 
                     const currentQuest = await Quest.findOne({ title: user.quest[0].title }).exec();
+                    let combatReport = {};
                     if (stageEnemy) {
                         //enemy at this stage
-                        const combatReport = await fightSimulator(user, stageEnemy);
+                        combatReport = await fightSimulator(user, stageEnemy);
                         user.unit.current_health = Math.round(combatReport.currentHealth);
 
                         if (!combatReport.success) {
                             //user lost fight
                             success = false;
+                            stageRewards.success = false;
                             user.status = "unconscious";
                             user.status_time = Date.now() //+ 20 * 3600 * 1000; REMOVE '//' TO WORK PROPERLY
                         }
                         else {
                             //get reward for this stage
                             var combatRewards = getRewards(user, combatStage);
-                            stageRewards.combatSoulstone= combatRewards.soulstone;
-                            stageRewards.combatXp= combatRewards.xp;
+                            stageRewards.combatSoulstone = combatRewards.soulstone;
+                            stageRewards.combatXp = combatRewards.xp;
                             //artifact reward
                             questType = currentQuest.type;
                             if (combatStage === 3 && questType === "treasure hunter") {
@@ -831,17 +900,19 @@ module.exports = {
                             }
                         }
                         //add reward of this stage
-                        rewards.push(stageRewards);
+
                     }
+                    rewards.push(stageRewards);
                     //create description
                     let description = { stage: combatStage, text: "", success: success };
                     description.text = createDescription(user, currentQuest, combatStage, stageEnemy, success, rewards);
                     stageDescriptions.push(description);
                     //create embed
-                    const stageEmbed = createQuestReportEmbed(user, stageDescriptions, healthBeforeQuest, rewards, combatStage)
+                    const stageEmbed = createQuestReportEmbed(user, stageDescriptions, healthBeforeQuest, combatReport,rewards, combatStage)
                     embedReport.push(stageEmbed);
 
                 }
+                const summaryEmbed = createReportSummaryEmbed(user, rewards);
                 //reset quest and status and save rewards
                 user.quest = [];
                 if (user.status === "endQuest") {
@@ -852,20 +923,44 @@ module.exports = {
                 let totalSoulstoneReward = 0;
                 for (stage of rewards) {
                     totalSoulstoneReward += stage.baseSoulstone + stage.combatSoulstone;
-                    console.log(stage.baseXp);
-                    console.log(stage.combatXp);
                     totalXpReward += stage.baseXp + stage.combatXp;
                 }
-                console.log(`check xp: ${totalXpReward}`);
                 user.unit.xp += totalXpReward;
                 user.soulstones += totalSoulstoneReward;
                 await user.save();
-                await levelUp(user, xpBefore, interaction.channel);
 
                 //send reply
-                console.log(`rewards:\n${JSON.stringify(rewards)}`);
-                await interaction.reply({ content: `Your quest ended`, embeds: embedReport[0] });
-                await interaction.followUp({ embeds: embedReport[1] })
+                let stageCounter = 1;
+                const reportRow = new MessageActionRow()
+                    .addComponents(
+                        new MessageButton()
+                            .setCustomId('next')
+                            .setLabel('<:arrow_right:>')
+                            .setStyle('SUCCESS')
+                    );
+
+                await interaction.reply({ embeds: embedReport[stageCounter - 1], components: [reportRow] });
+                const reportFilter = (int) => {
+                    if (int.user.id === interaction.user.id) {
+                        return true;
+                    }
+                    return int.reply({ content: `You can't use this button!` });
+                };
+                const reportCollector = interaction.channel.createMessageComponentCollector({ reportFilter });
+                reportCollector.on('collect', async i => {
+                    stageCounter++;
+                    i.deferUpdate();
+                    if (stageCounter <= embedReport.length) {
+                        await interaction.editReply({ embeds: embedReport[stageCounter - 1], components: [reportRow] });
+                    }
+                    else {
+                        //show report summary
+                        await interaction.editReply({ embeds: summaryEmbed, components: [] });
+                        reportCollector.stop();
+                    }
+                });
+                await levelUp(user, xpBefore, interaction.channel);
+
                 break;
             default:
                 //quest not available
