@@ -7,11 +7,6 @@ const client = new Client(
 );
 const User = require('./User');
 const Quest = require('./schemas/Quest');
-const deleteUserController = require(`./controller/deleteUserController.js`);
-
-
-//deleteUserController("312616992098091010", "324527754257367040"); //delete user Ramsus for test purpose
-
 
 //create a .commands to store all commands
 client.commands = new Collection();

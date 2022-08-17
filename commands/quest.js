@@ -254,7 +254,7 @@ async function createSelectionEmbed(user) {
     embeds.push(selectionEmbed);
     return embeds;
 }
-function createQuestReportEmbed(user, description, healthBefore,results, rewards, stage) {
+function createQuestReportEmbed(user, description, healthBefore, results, rewards, stage) {
     if (user.quest.length !== 1) {
         console.log(`Error at creating quest report: quest missing`);
         return [];
@@ -777,7 +777,7 @@ module.exports = {
                     user.quest = [user.quest[chosenQuest]];
                     //set status and status time
                     user.status = "atQuest";
-                    user.status_time = Date.now()// + user.quest[0].duration * 1000;  REMOVE '//' TO WORK PROPERLY
+                    user.status_time = Date.now() + user.quest[0].duration * 1000;
 
                     //reply
                     await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
@@ -850,7 +850,7 @@ module.exports = {
                             success = false;
                             stageRewards.success = false;
                             user.status = "unconscious";
-                            user.status_time = Date.now() //+ 20 * 3600 * 1000; REMOVE '//' TO WORK PROPERLY
+                            user.status_time = Date.now() + 20 * 3600 * 1000;
                         }
                         else {
                             //get reward for this stage
@@ -908,7 +908,7 @@ module.exports = {
                     description.text = createDescription(user, currentQuest, combatStage, stageEnemy, success, rewards);
                     stageDescriptions.push(description);
                     //create embed
-                    const stageEmbed = createQuestReportEmbed(user, stageDescriptions, healthBeforeQuest, combatReport,rewards, combatStage)
+                    const stageEmbed = createQuestReportEmbed(user, stageDescriptions, healthBeforeQuest, combatReport, rewards, combatStage)
                     embedReport.push(stageEmbed);
 
                 }
