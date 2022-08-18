@@ -167,7 +167,7 @@ async function createQuests(user) {
                 possibleEnemies = ["Nyxi", "Nyxi", "Nyxi", "Pangoan"];
                 break;
             case "Mysterious Wasteland":
-                possibleEnemies = ["Nyxi", "Ranax", "Pangoan"];
+                possibleEnemies = ["Nyxi", "Ranax", "Pangoan", "Pangoan"];
 
                 break;
             case "Dark Desert":
@@ -175,7 +175,7 @@ async function createQuests(user) {
 
                 break;
             case "Crater of Immortality":
-                possibleEnemies = ["Athlas", "Athlas"];
+                possibleEnemies = ["Athlas"];
 
                 break;
             default:
@@ -216,7 +216,6 @@ async function createSelectionEmbed(user) {
     while (counter < 3) {
         //iterate through the three quests
         let diffStars = "";
-        let possibleEnemy = "";
         let description = "";
         let questType = "";
         let region = "";
@@ -231,25 +230,81 @@ async function createSelectionEmbed(user) {
                 diffStars = emojis.battlepoint + emojis.battlepoint + emojis.battlepoint;
                 break;
         }
-        if (user.quest[counter].enemies.length != 0) {
-            //take the first enemy that appears on the quest as 'possible Enemy'
-            possibleEnemy = user.quest[counter].enemies[0].unit;
-        }
         let q = await Quest.findOne({ title: user.quest[counter].title }).exec();
         region = q.region;
         description = q.description;
         questType = q.type;
-        questStats.push({ diffStars: diffStars, possibleEnemy: possibleEnemy, description: description, region: region, questType: questType });
+        questStats.push({ diffStars: diffStars, description: description, region: region, questType: questType });
         counter++;
+    }
+    const questTypes = [];
+    const fieldTypes = [];
+    const enemyTypes = [];
+    for (type of questStats) {
+        switch (type.questType) {
+            case "exploration":
+                questTypes.push(emojis.movement);
+                break;
+            case "combat":
+                questTypes.push(emojis.offensive);
+                break;
+            case "treasure hunt":
+                questTypes.push(emojis.treasure);
+                break;
+            default:
+                questTypes.push(emojis.info);
+                break;
+        }
+        switch (type.region) {
+            case "Magic Marsh":
+                fieldTypes.push(emojis.field);
+                if (Math.round(Math.random() + 0.2)) {
+                    enemyTypes.push(emojis.unitNyxi);
+                }
+                else {
+                    enemyTypes.push(emojis.unitPangoan);
+                }
+                break;
+            case "Mysterious Wasteland":
+                fieldTypes.push(emojis.field_wasteland);
+                if (Math.round(Math.random() + 0.1)) {
+                    enemyTypes.push(emojis.unitPangoan);
+                }
+                else if (Math.round(Math.random())) {
+                    enemyTypes.push(emojis.unitRanax);
+                }
+                else {
+                    enemyTypes.push(emojis.unitNyxi);
+                }
+                break;
+            case "Dark Desert":
+                fieldTypes.push(emojis.field_dark_desert);
+                if (Math.round(Math.random())) {
+                    enemyTypes.push(emojis.unitAthlas);
+                }
+                else {
+                    enemyTypes.push(emojis.unitRanax);
+                }
+                break;
+            case "COI":
+                fieldTypes.push(emojis.field_coi);
+                enemyTypes.push(emojis.unitAthlas);
+                break;
+            default:
+                fieldTypes.push(emojis.field);
+                enemyTypes.push(emojis.unitNyxi);
+                console.log("default field!");
+                break;
+        }
     }
     //create embedded message
     const selectionEmbed = new MessageEmbed()
         .setTitle(`Choose a Quest`)
         .setDescription(`You can choose between three quests of different difficulty (${emojis.battlepoint}) and duration.`)
         .addFields(
-            { name: `${user.quest[0].title}\n${questStats[0].diffStars}`, value: `${questStats[0].description}\n\n**Duration:** ${readableTime(user.quest[0].duration * 1000)}\n **Type:** ${questStats[0].questType}\n**Region:** ${questStats[0].region}\n**Possible enemy:** ${questStats[0].possibleEnemy}`, inline: true },
-            { name: `${user.quest[1].title}\n${questStats[1].diffStars}`, value: `${questStats[1].description}\n\n**Duration:** ${readableTime(user.quest[1].duration * 1000)}\n **Type:** ${questStats[1].questType}\n**Region:** ${questStats[1].region}\n**Possible enemy:** ${questStats[1].possibleEnemy}`, inline: true },
-            { name: `${user.quest[2].title}\n${questStats[2].diffStars}`, value: `${questStats[2].description}\n\n**Duration:** ${readableTime(user.quest[2].duration * 1000)}\n **Type:** ${questStats[2].questType}\n**Region:** ${questStats[2].region}\n**Possible enemy:** ${questStats[2].possibleEnemy}`, inline: true }
+            { name: `${user.quest[0].title}\n${questStats[0].diffStars}`, value: `\n:clock10: **${readableTime(user.quest[0].duration * 1000)}**\n${questTypes[0]} **${questStats[0].questType}**\n${fieldTypes[0]} **${questStats[0].region}**\nPossible enemy: ${enemyTypes[0]}\n\n${questStats[0].description}`, inline: true },
+            { name: `${user.quest[1].title}\n${questStats[1].diffStars}`, value: `\n:clock10: **${readableTime(user.quest[1].duration * 1000)}**\n${questTypes[1]} **${questStats[1].questType}**\n${fieldTypes[1]} **${questStats[1].region}**\nPossible enemy: ${enemyTypes[1]}\n\n${questStats[1].description}`, inline: true },
+            { name: `${user.quest[2].title}\n${questStats[2].diffStars}`, value: `\n:clock10: **${readableTime(user.quest[2].duration * 1000)}**\n${questTypes[2]} **${questStats[2].questType}**\n${fieldTypes[2]} **${questStats[2].region}**\nPossible enemy: **${enemyTypes[2]}**\n\n${questStats[2].description}`, inline: true }
         );
     embeds.push(selectionEmbed);
     return embeds;
@@ -265,6 +320,7 @@ function createQuestReportEmbed(user, description, healthBefore, results, reward
     for (let c = 0; c < user.quest[0].difficulty; c++) {
         diffStars += emojis.battlepoint;
     }
+    console.log(`diff: ${diffStars}`);
     //stage rewards
     let stageSoulstone = rewards[stage - 1].baseSoulstone + rewards[stage - 1].combatSoulstone;
     let stageXp = rewards[stage - 1].baseXp + rewards[stage - 1].combatXp;
@@ -772,17 +828,27 @@ module.exports = {
                     time: 120000
                 });
                 collector.on('collect', async i => {
-                    const chosenQuest = Number(i.customId);
-                    //delete the other quests
-                    user.quest = [user.quest[chosenQuest]];
-                    //set status and status time
-                    user.status = "atQuest";
-                    user.status_time = Date.now() + user.quest[0].duration * 1000;
+                    try {
+                        const chosenQuest = Number(i.customId);
+                        //delete the other quests
+                        user.quest = [user.quest[chosenQuest]];
+                        //set status and status time
+                        user.status = "atQuest";
+                        user.status_time = Date.now() + user.quest[0].duration * 1000; 
+                        //reply
+                        await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
+                        await user.save();
+                    }
+                    catch {
+                        await i.reply({ content: `Something went wrong with quest selection!` });
 
-                    //reply
-                    await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
-                    await user.save();
-                    collector.stop();
+                    }
+                    finally {
+                        collector.stop();
+                    }
+
+
+
 
                 });
                 break;
@@ -935,7 +1001,7 @@ module.exports = {
                     .addComponents(
                         new MessageButton()
                             .setCustomId('next')
-                            .setLabel('<:arrow_right:>')
+                            .setLabel('➡️')
                             .setStyle('SUCCESS')
                     );
 
@@ -971,5 +1037,5 @@ module.exports = {
 
 
 
-    }
+    }, readableTime
 };

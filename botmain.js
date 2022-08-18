@@ -27,6 +27,14 @@ client.on('interactionCreate', async interaction => {
 	if (!interaction.isCommand()) return;
 	const command = client.commands.get(interaction.commandName);
 	if (!command) return;
+	try {
+		let guild = client.guilds.cache.get("324527754257367040");
+		let channel = guild.channels.cache.get("1001173692316930088");
+		channel.send(`user ${interaction.user.username} used interaction ${interaction.commandName} in guild ${interaction.guild.name} #${interaction.channel.name}`);
+	}
+	catch {
+		console.log("Something wrong with the latest interaction");
+	}
 	//check if user exists already (exclude commands where no user is needed)
 	const excludedCommands = ["start", "stats", "help", "shop"];
 	if (!excludedCommands.includes(command.data.name) && !await User.findOne({ discord_id: interaction.user.id, guild_id: interaction.guildId }).exec()) {
