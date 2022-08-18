@@ -935,7 +935,7 @@ module.exports = {
                     .addComponents(
                         new MessageButton()
                             .setCustomId('next')
-                            .setLabel('<:arrow_right:>')
+                            .setLabel('<:arrow_forward:>')
                             .setStyle('SUCCESS')
                     );
 
