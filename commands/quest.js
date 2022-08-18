@@ -247,9 +247,9 @@ async function createSelectionEmbed(user) {
         .setTitle(`Choose a Quest`)
         .setDescription(`You can choose between three quests of different difficulty (${emojis.battlepoint}) and duration.`)
         .addFields(
-            { name: `${user.quest[0].title}\n${questStats[0].diffStars}`, value: `${questStats[0].description}\n\n**Duration:** ${readableTime(user.quest[0].duration * 1000)}\n **Type:** ${questStats[0].questType}\n**Region:** ${questStats[0].region}\n**Possible enemy:** ${questStats[0].possibleEnemy}`, inline: true },
-            { name: `${user.quest[1].title}\n${questStats[1].diffStars}`, value: `${questStats[1].description}\n\n**Duration:** ${readableTime(user.quest[1].duration * 1000)}\n **Type:** ${questStats[1].questType}\n**Region:** ${questStats[1].region}\n**Possible enemy:** ${questStats[1].possibleEnemy}`, inline: true },
-            { name: `${user.quest[2].title}\n${questStats[2].diffStars}`, value: `${questStats[2].description}\n\n**Duration:** ${readableTime(user.quest[2].duration * 1000)}\n **Type:** ${questStats[2].questType}\n**Region:** ${questStats[2].region}\n**Possible enemy:** ${questStats[2].possibleEnemy}`, inline: true }
+            { name: `${user.quest[0].title}\n${questStats[0].diffStars}`, value: `Duration: **${readableTime(user.quest[0].duration * 1000)}**\nType: **${questStats[0].questType}**\nRegion: **${questStats[0].region}**\nPossible enemy: **${questStats[0].possibleEnemy}**\n\n${questStats[0].description}`, inline: true },
+            { name: `${user.quest[1].title}\n${questStats[1].diffStars}`, value: `Duration: **${readableTime(user.quest[1].duration * 1000)}**\nType: **${questStats[1].questType}**\nRegion: **${questStats[1].region}**\nPossible enemy: **${questStats[1].possibleEnemy}**\n\n${questStats[1].description}`, inline: true },
+            { name: `${user.quest[2].title}\n${questStats[2].diffStars}`, value: `Duration: **${readableTime(user.quest[2].duration * 1000)}**\nType: **${questStats[2].questType}**\nRegion: **${questStats[2].region}**\nPossible enemy: **${questStats[2].possibleEnemy}**\n\n${questStats[2].description}`, inline: true }
         );
     embeds.push(selectionEmbed);
     return embeds;
