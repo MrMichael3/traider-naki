@@ -7,6 +7,7 @@ const emojis = require('./../emojis.json');
 const { getUnitLevel, xpOfLevel } = require('./../controller/unitLevel.js');
 const { findUnitIconsById } = require('./start.js');
 const progressbar = require('string-progressbar');
+const { readableTime } = require('./quest.js');
 
 function createEmbeds(user) {
 	const embeds = [];
@@ -24,7 +25,6 @@ function createEmbeds(user) {
 		case "druidNaki":
 			unitId = 1;
 			thumbnail = "https://i.imgur.com/ZYOXfAK.png";
-
 			break;
 		case "guardNaki":
 			unitId = 2;
@@ -44,6 +44,11 @@ function createEmbeds(user) {
 	}
 	strongAgainst = unitStats.starterUnits.find(x => x.id === unitId).strongAgainst;
 	weakAgainst = unitStats.starterUnits.find(x => x.id === unitId).weakAgainst;
+	let statusWithTime = user.status;
+	const l = ["atTraining", "atQuest"];
+	if (l.includes(user.status)) {
+		statusWithTime += ` (${readableTime(user.status_time - Date.now())})`;
+	}
 	const unitStatsEmbed = new MessageEmbed()
 		.setTitle(`${userName}, ${unitName} Level ${unitLevel}`)
 		.setThumbnail(thumbnail)
@@ -51,7 +56,7 @@ function createEmbeds(user) {
 		.addFields(
 			{ name: 'Health', value: `${user.unit.current_health}/${user.unit.max_health}${emojis.defensive}`, inline: true },
 			{ name: 'Attack', value: `${user.unit.min_attack}-${user.unit.max_attack}${emojis.offensive}`, inline: true },
-			{ name: 'Status', value: `${user.status}`, inline: true },
+			{ name: 'Status', value: `${statusWithTime}`, inline: true },
 			{ name: 'Strong against', value: `${findUnitIconsById(strongAgainst)}`, inline: true },
 			{ name: 'Weak against', value: `${findUnitIconsById(weakAgainst)}`, inline: true }
 		)
