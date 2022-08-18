@@ -258,7 +258,7 @@ async function createSelectionEmbed(user) {
         switch (type.region) {
             case "Magic Marsh":
                 fieldTypes.push(emojis.field);
-                if (Math.round(Math.random()+0.2)) {
+                if (Math.round(Math.random() + 0.2)) {
                     enemyTypes.push(emojis.unitNyxi);
                 }
                 else {
@@ -267,7 +267,7 @@ async function createSelectionEmbed(user) {
                 break;
             case "Mysterious Wasteland":
                 fieldTypes.push(emojis.field_wasteland);
-                if (Math.round(Math.random()+0.1)) {
+                if (Math.round(Math.random() + 0.1)) {
                     enemyTypes.push(emojis.unitPangoan);
                 }
                 else if (Math.round(Math.random())) {
@@ -828,17 +828,27 @@ module.exports = {
                     time: 120000
                 });
                 collector.on('collect', async i => {
-                    const chosenQuest = Number(i.customId);
-                    //delete the other quests
-                    user.quest = [user.quest[chosenQuest]];
-                    //set status and status time
-                    user.status = "atQuest";
-                    user.status_time = Date.now()// + user.quest[0].duration * 1000; CHANGE TO WORK PROPERLY
+                    try {
+                        const chosenQuest = Number(i.customId);
+                        //delete the other quests
+                        user.quest = [user.quest[chosenQuest]];
+                        //set status and status time
+                        user.status = "atQuest";
+                        user.status_time = Date.now() + user.quest[0].duration * 1000; 
+                        //reply
+                        await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
+                        await user.save();
+                    }
+                    catch {
+                        await i.reply({ content: `Something went wrong with quest selection!` });
 
-                    //reply
-                    await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
-                    await user.save();
-                    collector.stop();
+                    }
+                    finally {
+                        collector.stop();
+                    }
+
+
+
 
                 });
                 break;
@@ -906,7 +916,7 @@ module.exports = {
                             success = false;
                             stageRewards.success = false;
                             user.status = "unconscious";
-                            user.status_time = Date.now() //+ 20 * 3600 * 1000; REMOVE TO WORK PROPERLY!!!
+                            user.status_time = Date.now() + 20 * 3600 * 1000;
                         }
                         else {
                             //get reward for this stage
