@@ -777,7 +777,7 @@ module.exports = {
                     user.quest = [user.quest[chosenQuest]];
                     //set status and status time
                     user.status = "atQuest";
-                    user.status_time = Date.now() + user.quest[0].duration * 1000;
+                    user.status_time = Date.now()// + user.quest[0].duration * 1000; CHANGE TO WORK PROPERLY
 
                     //reply
                     await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
@@ -850,7 +850,7 @@ module.exports = {
                             success = false;
                             stageRewards.success = false;
                             user.status = "unconscious";
-                            user.status_time = Date.now() + 20 * 3600 * 1000;
+                            user.status_time = Date.now() //+ 20 * 3600 * 1000; REMOVE TO WORK PROPERLY!!!
                         }
                         else {
                             //get reward for this stage
@@ -935,7 +935,7 @@ module.exports = {
                     .addComponents(
                         new MessageButton()
                             .setCustomId('next')
-                            .setLabel('<:arrow_forward:>')
+                            .setLabel('➡️')
                             .setStyle('SUCCESS')
                     );
 
