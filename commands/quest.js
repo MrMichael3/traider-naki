@@ -242,14 +242,31 @@ async function createSelectionEmbed(user) {
         questStats.push({ diffStars: diffStars, possibleEnemy: possibleEnemy, description: description, region: region, questType: questType });
         counter++;
     }
+    const questTypes = [];
+    for (type of questStats) {
+        switch (type.questType) {
+            case "exploration":
+                questTypes.push(emojis.movement);
+                break;
+            case "combat":
+                questTypes.push(emojis.offensive);
+                break;
+            case "treasure hunt":
+                questTypes.push(emojis.treasure);
+                break;
+            default:
+                questTypes.push(emojis.info);
+                break;
+        }
+    }
     //create embedded message
     const selectionEmbed = new MessageEmbed()
         .setTitle(`Choose a Quest`)
         .setDescription(`You can choose between three quests of different difficulty (${emojis.battlepoint}) and duration.`)
         .addFields(
-            { name: `${user.quest[0].title}\n${questStats[0].diffStars}`, value: `Duration: **${readableTime(user.quest[0].duration * 1000)}**\nType: **${questStats[0].questType}**\nRegion: **${questStats[0].region}**\nPossible enemy: **${questStats[0].possibleEnemy}**\n\n${questStats[0].description}`, inline: true },
-            { name: `${user.quest[1].title}\n${questStats[1].diffStars}`, value: `Duration: **${readableTime(user.quest[1].duration * 1000)}**\nType: **${questStats[1].questType}**\nRegion: **${questStats[1].region}**\nPossible enemy: **${questStats[1].possibleEnemy}**\n\n${questStats[1].description}`, inline: true },
-            { name: `${user.quest[2].title}\n${questStats[2].diffStars}`, value: `Duration: **${readableTime(user.quest[2].duration * 1000)}**\nType: **${questStats[2].questType}**\nRegion: **${questStats[2].region}**\nPossible enemy: **${questStats[2].possibleEnemy}**\n\n${questStats[2].description}`, inline: true }
+            { name: `${user.quest[0].title}\n${questStats[0].diffStars}`, value: ` :clock10: **${readableTime(user.quest[0].duration * 1000)}**\n${questTypes[0]} **${questStats[0].questType}**\n${emojis.field} **${questStats[0].region}**\nPossible enemy: **${questStats[0].possibleEnemy}**\n\n${questStats[0].description}`, inline: true },
+            { name: `${user.quest[1].title}\n${questStats[1].diffStars}`, value: ` :clock10: **${readableTime(user.quest[1].duration * 1000)}**\n${questTypes[1]} **${questStats[1].questType}**\n${emojis.field} **${questStats[1].region}**\nPossible enemy: **${questStats[1].possibleEnemy}**\n\n${questStats[1].description}`, inline: true },
+            { name: `${user.quest[2].title}\n${questStats[2].diffStars}`, value: ` :clock10: **${readableTime(user.quest[2].duration * 1000)}**\n${questTypes[2]} **${questStats[2].questType}**\n${emojis.field} **${questStats[2].region}**\nPossible enemy: **${questStats[2].possibleEnemy}**\n\n${questStats[2].description}`, inline: true }
         );
     embeds.push(selectionEmbed);
     return embeds;
