@@ -1,4 +1,3 @@
-const mongoose = require('mongoose');
 const User = require('./../User.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { getUnitLevel, levelUp } = require('./../controller/unitLevel.js');
@@ -10,7 +9,6 @@ function calculateReward(streak) {
     const xp = Math.floor(Math.random() * 201 * (Math.min(streak, maxStreak) * 0.1) + 20);
     return [soulstone, xp];
 }
-
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -27,23 +25,30 @@ module.exports = {
         const lastMining = getUser.mining.last_mining;
         const xpBeforeReward = getUser.unit.xp;
         //check if user can mine
-        if (new Date(lastMining.toDateString()) < new Date(new Date().toDateString())) {
+        const lastDate = new Date(lastMining.toDateString());
+        const newDate = new Date(new Date().toDateString());
+        if (lastDate < newDate) {
             //set new Date
             getUser.mining.last_mining = Date.now();
-            await getUser.save();
-            var mine_streak = getUser.mining.streak;
-            mine_streak = mine_streak + 1;
-            const reward = calculateReward(mine_streak);
-            if (mine_streak === 1) {
+            var mineStreak = getUser.mining.streak;
+            lastDate.setDate(lastDate.getDate() + 1)
+            if (lastDate.getTime() == newDate.getTime()) {
+                mineStreak += 1;
+            }
+            else {
+                mineStreak = 1;
+            }
+            const reward = calculateReward(mineStreak);
+            if (mineStreak === 1) {
                 await interaction.reply({ content: `you mined ${reward[0]} soulstone and got ${reward[1]} XP!` });
             }
             else {
-                await interaction.reply({ content: `you mined ${reward[0]} soulstone and got ${reward[1]} XP!\n You are on a ${mine_streak} days streak.` });
+                await interaction.reply({ content: `you mined ${reward[0]} soulstone and got ${reward[1]} XP!\n You are on a ${mineStreak} days streak.` });
             }
             //save changes to DB
             getUser.soulstones = getUser.soulstones + reward[0];
             getUser.unit.xp = xpBeforeReward + reward[1];
-            getUser.mining.streak = mine_streak;
+            getUser.mining.streak = mineStreak;
             await getUser.save();
             if (getUnitLevel(xpBeforeReward) != getUnitLevel(getUser.unit.xp)) {
                 //user got a level up
