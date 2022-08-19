@@ -8,10 +8,9 @@ const healPercentage = 0.1 //percentage of maxHealth healed
 //const completeStatusList = ["idle", "atQuest", "endQuest", "atEvent", "atTraining", "unconscious"];
 const healableStatus = ["idle", "atTraining"];
 const statusWithEndTime = ["atQuest", "atEvent", "atTraining", "unconscious"];
-let lastHour = new Date().getHours;
-
+let lastHour = new Date().getHours();
 const checkForUpdates = async () => {
-    let newHour = new Date().getHours;
+    let newHour = new Date().getHours();
     if (newHour != lastHour) {
         //heal users every hour
         const healableUsers = await User.find({ status: { $in: healableStatus } });
