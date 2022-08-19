@@ -5,8 +5,8 @@ const { getUnitLevel, levelUp } = require('./../controller/unitLevel.js');
 const maxStreak = 30; //days until streak bonus is at max
 
 function calculateReward(streak) {
-    //get 20-300 soulstone, 20-620 xp
-    const soulstone = Math.floor(Math.random() * 101 * (Math.min(streak, maxStreak) * 0.1) + 20);
+    //get 50-350 soulstone, 20-620 xp
+    const soulstone = Math.floor(Math.random() * 101 * (Math.min(streak, maxStreak) * 0.1) + 50);
     const xp = Math.floor(Math.random() * 201 * (Math.min(streak, maxStreak) * 0.1) + 20);
     return [soulstone, xp];
 }

@@ -3,6 +3,7 @@ const User = require('./../User.js');
 const Item = require('./../schemas/Item.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { healUnit } = require('./../controller/healing.js');
+const emojis = require('./../emojis.json');
 
 
 module.exports = {
@@ -28,30 +29,66 @@ module.exports = {
             await interaction.reply({ content: `You don't have this item!` });
             return;
         }
-        //TODO: use the item
-        successfullyHealed = await healUnit(user, usedItem.effect);
-        console.log(`successfullyHealed = ${successfullyHealed}`);
-        if (!successfullyHealed) {
-            await interaction.reply({
-                content: `Could not heal. You can only heal yourself when you are idle or at training and not already have full health.`
+        switch (usedItem.type) {
+
+            case "revive":
+                //reviving item
+                const newHealth = user.unit.max_health * usedItem.effect;
+                if (newHealth <= user.unit.current_health) {
+                    await interaction.reply({ content: `You can't use ${usedItem.name} because your health isn't under ${usedItem.effect * 100}% hp.` });
+                    return;
+                }
+                user.unit.current_health = newHealth;
+                if (user.status === "unconscious") {
+                    user.status = "idle";
+                    await user.save();
+                    var changedUser = await User.findOne({ discord_id: user.discord_id, guild_id: user.guild_id });
+                    interaction.reply({ content: `You used the item ${usedItem.name} to wake up and restore your health to ${usedItem.effect * 100}%.` });
+                }
+                else {
+                    await user.save();
+                    var changedUser = await User.findOne({ discord_id: user.discord_id, guild_id: user.guild_id });
+                    interaction.reply({ content: `You used the item ${usedItem.name} to restore your health to ${usedItem.effect * 100}%.` });
+                }
+                break;
+
+            case "heal":
+                //healing item
+                if (user.status === "unconscious") {
+                    await interaction.reply({ content: `You can't heal yourself while you are unconscious!` });
+                    return;
+                }
+                const successfullyHealed = await healUnit(user, usedItem.effect);
+                if (!successfullyHealed) {
+                    await interaction.reply({
+                        content: `Could not heal. You can only heal yourself when you are idle or at training and not already have full health.`
+                    });
+                    return;
+                }
+                var changedUser = await User.findOne({ discord_id: user.discord_id, guild_id: user.guild_id });
+                await interaction.reply({
+                    content: `You used the item ${usedItem.name} to heal yourself.\nYour health: ${changedUser.unit.current_health}/${changedUser.unit.max_health}${emojis.defensive}`
+                });
+                break;
+            default:
+                await interaction.reply({ content: `item ${usedItem.name} has an unknown item type: ${usedItem.type}` });
+                return;
+        }
+        try {
+            //reduce amount of used item in inventory and remove item from inventory if user only had one
+            changedUser.inventory = changedUser.inventory.map(obj => {
+                if (obj.item_name === usedItem.name) {
+                    let m = obj.amount;
+                    return { ...obj, amount: m - 1 };
+                }
+                return obj;
             });
+            changedUser.inventory = changedUser.inventory.filter(item => item.amount !== 0);
+            await changedUser.save();
             return;
         }
-        await interaction.reply({
-            content: `You used the item ${usedItem.name} to heal yourself`
-        });
-        //get User again because healing function changed User in DB
-        var changedUser = await User.findOne({ discord_id: user.discord_id, guild_id: user.guild_id });
-        //reduce amount of used item in inventory and remove item from inventory if user only had one
-        changedUser.inventory = changedUser.inventory.map(obj => {
-            if (obj.item_name === usedItem.name) {
-                let m = obj.amount;
-                return { ...obj, amount: m - 1 };
-            }
-            return obj;
-        });
-        changedUser.inventory = changedUser.inventory.filter(item =>item.amount !== 0);
-        await changedUser.save();
-        return;
+        catch {
+            return;
+        }
     }
 };

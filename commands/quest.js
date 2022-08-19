@@ -4,7 +4,7 @@ const Item = require('./../schemas/Item.js');
 const Quest = require('./../schemas/Quest.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const unitData = require('./../unitStats.json');
-const { MessageEmbed, MessageActionRow, MessageButton, EmbedBuilder } = require('discord.js');
+const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
 const emojis = require('./../emojis.json');
 const { getUnitLevel, statsMultiplier, levelUp } = require('./../controller/unitLevel.js');
 
@@ -15,7 +15,8 @@ const durationPeriod = 36000 //period of quest duration in seconds
 const uncommonArtifactChance = 0.1;
 const rareArtifactChance = 0.2;
 const legendaryArtifactChance = 0.2;
-
+const soulstoneMultiplier = 500 // multiplier * duration/maxDuration * difficulty = base soulstone reward
+const xpMultiplier = 10 // multiplier^level = base xp reward
 
 function readableTime(ms) {
     let sec = ms / 1000;
@@ -129,10 +130,10 @@ async function createQuests(user) {
         let durationRegionFactor = 1;
         switch (quest.region) {
             case "Magic Marsh":
-                durationRegionFactor = 0.5;
+                durationRegionFactor = 0.25;
                 break;
             case "Mysterious Wasteland":
-                durationRegionFactor = 0.7;
+                durationRegionFactor = 0.6;
                 break;
             case "Dark Desert":
                 durationRegionFactor = 1;
@@ -834,7 +835,7 @@ module.exports = {
                         user.quest = [user.quest[chosenQuest]];
                         //set status and status time
                         user.status = "atQuest";
-                        user.status_time = Date.now() + user.quest[0].duration * 1000; 
+                        user.status_time = Date.now() + user.quest[0].duration * 1000;
                         //reply
                         await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
                         await user.save();
@@ -900,8 +901,9 @@ module.exports = {
                     let stageEnemy = user.quest[0].enemies.find(x => x.stage === combatStage);
                     let userLvl = getUnitLevel(user.unit.xp);
                     //base rewards per stage
-                    let baseSoulstone = Math.round((100 * (user.quest[0].duration / (durationPeriod + minDuration) * user.quest[0].difficulty)) / 3);
-                    let baseXp = Math.round((10 * Math.pow(1.1, userLvl)) / 3);
+                    console.log(`maxDuration: ${durationPeriod + minDuration}`)
+                    let baseSoulstone = Math.round((soulstoneMultiplier * (user.quest[0].duration / (durationPeriod + minDuration) * user.quest[0].difficulty)) / 3);
+                    let baseXp = Math.round((xpMultiplier * Math.pow(1.1, userLvl)) / 3);
                     let stageRewards = { baseSoulstone: baseSoulstone, baseXp: baseXp, combatSoulstone: 0, combatXp: 0, artifact: "", success: true };
 
                     const currentQuest = await Quest.findOne({ title: user.quest[0].title }).exec();

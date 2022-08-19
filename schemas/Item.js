@@ -25,6 +25,9 @@ const ItemSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
+    type: {
+        type: String
+    },
     effect: {
         type: Number
     },
