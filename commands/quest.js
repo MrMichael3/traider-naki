@@ -15,6 +15,7 @@ const durationPeriod = 36000 //period of quest duration in seconds
 const uncommonArtifactChance = 0.1;
 const rareArtifactChance = 0.2;
 const legendaryArtifactChance = 0.2;
+const soulstoneMultiplier = 500 // multiplier * duration/maxDuration * difficulty = base soulstone reward
 
 
 function readableTime(ms) {
@@ -900,7 +901,8 @@ module.exports = {
                     let stageEnemy = user.quest[0].enemies.find(x => x.stage === combatStage);
                     let userLvl = getUnitLevel(user.unit.xp);
                     //base rewards per stage
-                    let baseSoulstone = Math.round((100 * (user.quest[0].duration / (durationPeriod + minDuration) * user.quest[0].difficulty)) / 3);
+                    console.log(`maxDuration: ${durationPeriod + minDuration}`)
+                    let baseSoulstone = Math.round((soulstoneMultiplier * (user.quest[0].duration / (durationPeriod + minDuration) * user.quest[0].difficulty)) / 3);
                     let baseXp = Math.round((10 * Math.pow(1.1, userLvl)) / 3);
                     let stageRewards = { baseSoulstone: baseSoulstone, baseXp: baseXp, combatSoulstone: 0, combatXp: 0, artifact: "", success: true };
 
