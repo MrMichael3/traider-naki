@@ -4,7 +4,7 @@ const Item = require('./../schemas/Item.js');
 const Quest = require('./../schemas/Quest.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const unitData = require('./../unitStats.json');
-const { MessageEmbed, MessageActionRow, MessageButton, EmbedBuilder } = require('discord.js');
+const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
 const emojis = require('./../emojis.json');
 const { getUnitLevel, statsMultiplier, levelUp } = require('./../controller/unitLevel.js');
 
@@ -129,10 +129,10 @@ async function createQuests(user) {
         let durationRegionFactor = 1;
         switch (quest.region) {
             case "Magic Marsh":
-                durationRegionFactor = 0.5;
+                durationRegionFactor = 0.25;
                 break;
             case "Mysterious Wasteland":
-                durationRegionFactor = 0.7;
+                durationRegionFactor = 0.6;
                 break;
             case "Dark Desert":
                 durationRegionFactor = 1;
