@@ -3,6 +3,7 @@ const User = require('./../User.js');
 const Item = require('./../schemas/Item.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { healUnit } = require('./../controller/healing.js');
+const emojis = require('./../emojis.json');
 
 
 module.exports = {
@@ -66,7 +67,7 @@ module.exports = {
                 }
                 var changedUser = await User.findOne({ discord_id: user.discord_id, guild_id: user.guild_id });
                 await interaction.reply({
-                    content: `You used the item ${usedItem.name} to heal yourself.\nYour health: ${changedUser.unit.current_health}/${changedUser.unit.max_health}`
+                    content: `You used the item ${usedItem.name} to heal yourself.\nYour health: ${changedUser.unit.current_health}/${changedUser.unit.max_health}${emojis.defensive}`
                 });
                 break;
             default:
