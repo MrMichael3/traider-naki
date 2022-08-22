@@ -15,8 +15,9 @@ const durationPeriod = 36000 //period of quest duration in seconds
 const uncommonArtifactChance = 0.1;
 const rareArtifactChance = 0.2;
 const legendaryArtifactChance = 0.2;
-const soulstoneMultiplier = 500 // multiplier * duration/maxDuration * difficulty = base soulstone reward
-const xpMultiplier = 10 // multiplier^level = base xp reward
+const soulstoneMultiplier = 500; // multiplier * duration/maxDuration * difficulty = base soulstone reward
+const xpMultiplier = 10; // multiplier^level = base xp reward
+
 
 function readableTime(ms) {
     let sec = ms / 1000;
@@ -310,7 +311,7 @@ async function createSelectionEmbed(user) {
     embeds.push(selectionEmbed);
     return embeds;
 }
-function createQuestReportEmbed(user, description, healthBefore, results, rewards, stage) {
+function createQuestReportEmbed(user, description, results, rewards, stage) {
     if (user.quest.length !== 1) {
         console.log(`Error at creating quest report: quest missing`);
         return [];
@@ -321,7 +322,6 @@ function createQuestReportEmbed(user, description, healthBefore, results, reward
     for (let c = 0; c < user.quest[0].difficulty; c++) {
         diffStars += emojis.battlepoint;
     }
-    console.log(`diff: ${diffStars}`);
     //stage rewards
     let stageSoulstone = rewards[stage - 1].baseSoulstone + rewards[stage - 1].combatSoulstone;
     let stageXp = rewards[stage - 1].baseXp + rewards[stage - 1].combatXp;
@@ -488,7 +488,7 @@ function getRewards(user, stage) {
             strength = health * attack;
             baseStrength = baseUnit.health * (baseUnit.minAttack + baseUnit.maxAttack) / 2;
             soulstoneReward += strength / baseStrength * 3;
-            xpReward += strength / baseStrength * 10;
+            xpReward += strength / 100;
             if (quest.type === "exploration") {
                 soulstoneReward = soulstoneReward * 1.5;
                 xpReward = xpReward * 0.8;
@@ -782,6 +782,13 @@ module.exports = {
             console.log(`user ${interaction.user.id} not found!`);
             return;
         }
+        //messageCollector
+        const filter = (int) => {
+            if (int.user.id === interaction.user.id) {
+                return true;
+            }
+            return int.reply({ content: `You can't use this button!`, ephemeral: true });
+        };
         switch (user.status) {
             case 'idle':
                 //start a new quest
@@ -817,13 +824,7 @@ module.exports = {
                 const embed = await createSelectionEmbed(user);
                 await interaction.editReply({ embeds: embed, components: [row] });
 
-                //messageCollector
-                const filter = (int) => {
-                    if (int.user.id === interaction.user.id) {
-                        return true;
-                    }
-                    return int.reply({ content: `You can't use this button!` });
-                };
+
                 const collector = interaction.channel.createMessageComponentCollector({
                     filter,
                     time: 120000
@@ -841,16 +842,11 @@ module.exports = {
                         await user.save();
                     }
                     catch {
-                        await i.reply({ content: `Something went wrong with quest selection!` });
-
+                        console.log(`error at quest selection`);
                     }
                     finally {
                         collector.stop();
                     }
-
-
-
-
                 });
                 break;
 
@@ -901,7 +897,6 @@ module.exports = {
                     let stageEnemy = user.quest[0].enemies.find(x => x.stage === combatStage);
                     let userLvl = getUnitLevel(user.unit.xp);
                     //base rewards per stage
-                    console.log(`maxDuration: ${durationPeriod + minDuration}`)
                     let baseSoulstone = Math.round((soulstoneMultiplier * (user.quest[0].duration / (durationPeriod + minDuration) * user.quest[0].difficulty)) / 3);
                     let baseXp = Math.round((xpMultiplier * Math.pow(1.1, userLvl)) / 3);
                     let stageRewards = { baseSoulstone: baseSoulstone, baseXp: baseXp, combatSoulstone: 0, combatXp: 0, artifact: "", success: true };
@@ -976,7 +971,7 @@ module.exports = {
                     description.text = createDescription(user, currentQuest, combatStage, stageEnemy, success, rewards);
                     stageDescriptions.push(description);
                     //create embed
-                    const stageEmbed = createQuestReportEmbed(user, stageDescriptions, healthBeforeQuest, combatReport, rewards, combatStage)
+                    const stageEmbed = createQuestReportEmbed(user, stageDescriptions, combatReport, rewards, combatStage)
                     embedReport.push(stageEmbed);
 
                 }
@@ -1008,36 +1003,31 @@ module.exports = {
                     );
 
                 await interaction.reply({ embeds: embedReport[stageCounter - 1], components: [reportRow] });
-                const reportFilter = (int) => {
-                    if (int.user.id === interaction.user.id) {
-                        return true;
-                    }
-                    return int.reply({ content: `You can't use this button!` });
-                };
-                const reportCollector = interaction.channel.createMessageComponentCollector({ reportFilter });
+                const reportCollector = interaction.channel.createMessageComponentCollector({ filter, time: 120000 });
                 reportCollector.on('collect', async i => {
                     stageCounter++;
-                    i.deferUpdate();
-                    if (stageCounter <= embedReport.length) {
-                        await interaction.editReply({ embeds: embedReport[stageCounter - 1], components: [reportRow] });
+                    try {
+                        i.deferUpdate();
+                        if (stageCounter <= embedReport.length) {
+                            await interaction.editReply({ embeds: embedReport[stageCounter - 1], components: [reportRow] });
+                        }
+                        else {
+                            //show report summary
+                            await interaction.editReply({ embeds: summaryEmbed, components: [] });
+                            reportCollector.stop();
+                        }
                     }
-                    else {
-                        //show report summary
-                        await interaction.editReply({ embeds: summaryEmbed, components: [] });
-                        reportCollector.stop();
+                    catch {
+                        console.log(`interaction with arrow button at quest report not possible!`);
                     }
                 });
                 await levelUp(user, xpBefore, interaction.channel);
-
                 break;
             default:
                 //quest not available
-                console.log('default option at /quest');
-                interaction.reply({ content: `You are ${user.status} and can't do a quest at the moment. Come back when you are idle.` });
+                console.log(`default option at /quest with status ${user.status}`);
+                await interaction.reply({ content: `You are ${user.status} and can't do a quest at the moment. Come back when you are idle.` });
                 return;
         }
-
-
-
     }, readableTime
 };

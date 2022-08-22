@@ -82,12 +82,12 @@ module.exports = {
                     new MessageButton()
                         .setCustomId('yes')
                         .setLabel('YES')
-                        .setStyle('SUCCESS'),
+                        .setStyle('DANGER'),
 
                     new MessageButton()
                         .setCustomId('no')
                         .setLabel('NO')
-                        .setStyle('DANGER')
+                        .setStyle('SECONDARY')
                 );
             await interaction.reply({
                 content: `Your training ends in **${remainingTime(remainTime)}**. Do you want to end training early? \n **Caution:** You get less experience by ending training early!`,

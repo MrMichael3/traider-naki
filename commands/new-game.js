@@ -23,12 +23,12 @@ module.exports = {
                 new MessageButton()
                     .setCustomId('yes')
                     .setLabel('YES')
-                    .setStyle('SUCCESS'),
+                    .setStyle('DANGER'),
 
                 new MessageButton()
                     .setCustomId('no')
                     .setLabel('NO')
-                    .setStyle('DANGER')
+                    .setStyle('SECONDARY')
             );
         await interaction.reply({
             content: `**Do you really want to delete your progress?**\nYour unit, inventory and soulstones will get deleted!`,
