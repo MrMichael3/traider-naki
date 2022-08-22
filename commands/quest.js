@@ -842,14 +842,12 @@ module.exports = {
                         await user.save();
                     }
                     catch {
-                        await i.reply({ content: `Something went wrong with quest selection!` });
-
+                        console.log(`error at quest selection`);
                     }
                     finally {
                         collector.stop();
                     }
                 });
-                console.log(`break 'idle`);
                 break;
 
             case 'atQuest':
@@ -1024,7 +1022,6 @@ module.exports = {
                     }
                 });
                 await levelUp(user, xpBefore, interaction.channel);
-                console.log(`break 'endQuest`);
                 break;
             default:
                 //quest not available
