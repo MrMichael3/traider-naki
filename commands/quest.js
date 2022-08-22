@@ -321,7 +321,6 @@ function createQuestReportEmbed(user, description, healthBefore, results, reward
     for (let c = 0; c < user.quest[0].difficulty; c++) {
         diffStars += emojis.battlepoint;
     }
-    console.log(`diff: ${diffStars}`);
     //stage rewards
     let stageSoulstone = rewards[stage - 1].baseSoulstone + rewards[stage - 1].combatSoulstone;
     let stageXp = rewards[stage - 1].baseXp + rewards[stage - 1].combatXp;
@@ -488,7 +487,7 @@ function getRewards(user, stage) {
             strength = health * attack;
             baseStrength = baseUnit.health * (baseUnit.minAttack + baseUnit.maxAttack) / 2;
             soulstoneReward += strength / baseStrength * 3;
-            xpReward += strength / baseStrength * 10;
+            xpReward += strength / 100;
             if (quest.type === "exploration") {
                 soulstoneReward = soulstoneReward * 1.5;
                 xpReward = xpReward * 0.8;
@@ -901,7 +900,6 @@ module.exports = {
                     let stageEnemy = user.quest[0].enemies.find(x => x.stage === combatStage);
                     let userLvl = getUnitLevel(user.unit.xp);
                     //base rewards per stage
-                    console.log(`maxDuration: ${durationPeriod + minDuration}`)
                     let baseSoulstone = Math.round((soulstoneMultiplier * (user.quest[0].duration / (durationPeriod + minDuration) * user.quest[0].difficulty)) / 3);
                     let baseXp = Math.round((xpMultiplier * Math.pow(1.1, userLvl)) / 3);
                     let stageRewards = { baseSoulstone: baseSoulstone, baseXp: baseXp, combatSoulstone: 0, combatXp: 0, artifact: "", success: true };
