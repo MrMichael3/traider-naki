@@ -15,8 +15,9 @@ const durationPeriod = 36000 //period of quest duration in seconds
 const uncommonArtifactChance = 0.1;
 const rareArtifactChance = 0.2;
 const legendaryArtifactChance = 0.2;
-const soulstoneMultiplier = 500 // multiplier * duration/maxDuration * difficulty = base soulstone reward
-const xpMultiplier = 10 // multiplier^level = base xp reward
+const soulstoneMultiplier = 500; // multiplier * duration/maxDuration * difficulty = base soulstone reward
+const xpMultiplier = 10; // multiplier^level = base xp reward
+
 
 function readableTime(ms) {
     let sec = ms / 1000;
@@ -310,7 +311,7 @@ async function createSelectionEmbed(user) {
     embeds.push(selectionEmbed);
     return embeds;
 }
-function createQuestReportEmbed(user, description, healthBefore, results, rewards, stage) {
+function createQuestReportEmbed(user, description, results, rewards, stage) {
     if (user.quest.length !== 1) {
         console.log(`Error at creating quest report: quest missing`);
         return [];
@@ -781,6 +782,13 @@ module.exports = {
             console.log(`user ${interaction.user.id} not found!`);
             return;
         }
+        //messageCollector
+        const filter = (int) => {
+            if (int.user.id === interaction.user.id) {
+                return true;
+            }
+            return int.reply({ content: `You can't use this button!`, ephemeral: true });
+        };
         switch (user.status) {
             case 'idle':
                 //start a new quest
@@ -816,13 +824,7 @@ module.exports = {
                 const embed = await createSelectionEmbed(user);
                 await interaction.editReply({ embeds: embed, components: [row] });
 
-                //messageCollector
-                const filter = (int) => {
-                    if (int.user.id === interaction.user.id) {
-                        return true;
-                    }
-                    return int.reply({ content: `You can't use this button!` });
-                };
+
                 const collector = interaction.channel.createMessageComponentCollector({
                     filter,
                     time: 120000
@@ -846,11 +848,8 @@ module.exports = {
                     finally {
                         collector.stop();
                     }
-
-
-
-
                 });
+                console.log(`break 'idle`);
                 break;
 
             case 'atQuest':
@@ -974,7 +973,7 @@ module.exports = {
                     description.text = createDescription(user, currentQuest, combatStage, stageEnemy, success, rewards);
                     stageDescriptions.push(description);
                     //create embed
-                    const stageEmbed = createQuestReportEmbed(user, stageDescriptions, healthBeforeQuest, combatReport, rewards, combatStage)
+                    const stageEmbed = createQuestReportEmbed(user, stageDescriptions, combatReport, rewards, combatStage)
                     embedReport.push(stageEmbed);
 
                 }
@@ -1006,36 +1005,32 @@ module.exports = {
                     );
 
                 await interaction.reply({ embeds: embedReport[stageCounter - 1], components: [reportRow] });
-                const reportFilter = (int) => {
-                    if (int.user.id === interaction.user.id) {
-                        return true;
-                    }
-                    return int.reply({ content: `You can't use this button!` });
-                };
-                const reportCollector = interaction.channel.createMessageComponentCollector({ reportFilter });
+                const reportCollector = interaction.channel.createMessageComponentCollector({ filter, time: 120000 });
                 reportCollector.on('collect', async i => {
                     stageCounter++;
-                    i.deferUpdate();
-                    if (stageCounter <= embedReport.length) {
-                        await interaction.editReply({ embeds: embedReport[stageCounter - 1], components: [reportRow] });
+                    try {
+                        i.deferUpdate();
+                        if (stageCounter <= embedReport.length) {
+                            await interaction.editReply({ embeds: embedReport[stageCounter - 1], components: [reportRow] });
+                        }
+                        else {
+                            //show report summary
+                            await interaction.editReply({ embeds: summaryEmbed, components: [] });
+                            reportCollector.stop();
+                        }
                     }
-                    else {
-                        //show report summary
-                        await interaction.editReply({ embeds: summaryEmbed, components: [] });
-                        reportCollector.stop();
+                    catch {
+                        console.log(`interaction with arrow button at quest report not possible!`);
                     }
                 });
                 await levelUp(user, xpBefore, interaction.channel);
-
+                console.log(`break 'endQuest`);
                 break;
             default:
                 //quest not available
-                console.log('default option at /quest');
-                interaction.reply({ content: `You are ${user.status} and can't do a quest at the moment. Come back when you are idle.` });
+                console.log(`default option at /quest with status ${user.status}`);
+                await interaction.reply({ content: `You are ${user.status} and can't do a quest at the moment. Come back when you are idle.` });
                 return;
         }
-
-
-
     }, readableTime
 };
