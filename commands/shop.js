@@ -3,29 +3,66 @@ const User = require('./../User.js');
 const Item = require('./../schemas/Item.js');
 const emojis = require('./../emojis.json');
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageEmbed } = require('discord.js');
+const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
 
+const itemsPerShopPage = 10; //how many items are displayed per page in shop
 
-async function createEmbeds() {
+async function createEmbeds(start = 0) {
     // An embed message with the shop and all available items
     const embeds = [];
     var thumbnail = "";
-    const availableItems = [];
+    let availableItems = [];
     //iterate through items and add to the array
+    const healItems = [];
+    const artifactItems = [];
     for await (const item of Item.find({ buyable: true })) {
-        availableItems.push({ name: `${item.name} - ${item.cost} ${emojis.soulstone}`, value: `${item.description_short}`});
+        switch (item.type) {
+            case "heal":
+                healItems.push({ name: `${item.name} - ${item.cost} ${emojis.soulstone}`, value: `${item.description_short}`, cost: item.cost });
+                break;
+            case "revive":
+                healItems.push({ name: `${item.name} - ${item.cost} ${emojis.soulstone}`, value: `${item.description_short}`, cost: item.cost });
+                break;
+            case "collectible":
+                artifactItems.push({ name: `${item.name} - ${item.cost} ${emojis.soulstone}`, value: `${item.description_short}`, cost: item.cost });
+                break;
+        }
     }
-  
-    //temporary workaround to ensure staying in the limit of fields
-    if (availableItems.length > 25) {
-        console.log("Too many items in shop!");
-        availableItems = availableItems.slice(0, 24);
+    healItems.sort((a, b) => {
+        return a.cost - b.cost;
+    });
+    artifactItems.sort((a, b) => {
+        return a.cost - b.cost;
+    });
+    availableItems.push({ name: "Healing Items", value: "*can heal or revive you*" });
+    availableItems = availableItems.concat(healItems);
+    if (artifactItems.length != 0) {
+        availableItems.push({ name: "Artifacts", value: "*rare collectable artifacts*" });
+        availableItems = availableItems.concat(artifactItems);
     }
+    /*
+    const shopPages = [];
+    while (availableItems.length) {
+        if (availableItems.length > itemsPerShopPage) {
+            //no more than 15 items per shop page
+            let i = availableItems.slice(0, itemsPerShopPage);
+            shopPages.push(i);
+            availableItems = availableItems.slice(itemsPerShopPage);
+        }
+        else {
+            shopPages.push(availableItems);
+            availableItems = [];
+        }
+    }*/
+
+    const currentPage = availableItems.slice(start, start + itemsPerShopPage - 1);
+
     const shopEmbed = new MessageEmbed()
         .setTitle(`Traider Naki's Shop`)
         .setThumbnail(thumbnail)
         .setDescription(`*Spend your Soulstones on consumables and other items. \n Use '/shop [item]' to get more information and '/buy [item]' to buy an item.*`)
-        .addFields(availableItems);
+        .setColor("#7FFFD4")
+        .addFields(currentPage);
     embeds.push(shopEmbed);
     return embeds;
 }
@@ -69,9 +106,74 @@ module.exports = {
             await interaction.reply({ embeds: embedsInfo });
         }
         else {
-            //shop without option
+            //shop without specific item
+
+
+            const backId = 'back'
+            const forwardId = 'forward'
+            const backButton = new MessageButton({
+                style: 'SECONDARY',
+                label: 'Back',
+                emoji: '⬅️',
+                customId: backId
+            });
+            const forwardButton = new MessageButton({
+                style: 'SECONDARY',
+                label: 'Forward',
+                emoji: '➡️',
+                customId: forwardId
+            });
+            lengthBuyableItems = (await Item.find({ buyable: true })).length;
+            const singleShopPage = lengthBuyableItems < itemsPerShopPage;
             const embedsList = await createEmbeds();
-            await interaction.reply({ embeds: embedsList });
+            await interaction.reply({
+                embeds: embedsList,
+                components: singleShopPage
+                    ? []
+                    : [new MessageActionRow({ components: [forwardButton] })]
+            });
+            if (singleShopPage) {
+                return;
+            }
+            //collector for button interaction
+            const filter = (int) => {
+                if (int.user.id === interaction.user.id) {
+                    return true;
+                }
+                return int.reply({ content: `You can't use this button!`, ephemeral: true });
+            };
+            const collector = interaction.channel.createMessageComponentCollector({
+                filter
+            });
+            let currentIndex = 0;
+            collector.on('collect', async i => {
+                // Increase/decrease index
+                if (i.customId === backId) {
+                    currentIndex -= itemsPerShopPage;
+                }
+                else {
+                    currentIndex += itemsPerShopPage;
+                }
+                // Respond to interaction by updating message with new embed
+                try {
+                    await i.update({
+                        embeds: await createEmbeds(currentIndex),
+                        components: [
+                            new MessageActionRow({
+                                components: [
+                                    // back button if it isn't the start
+                                    ...(currentIndex ? [backButton] : []),
+                                    // forward button if it isn't the end
+                                    ...(currentIndex + itemsPerShopPage < lengthBuyableItems + 1 ? [forwardButton] : [])
+                                ]
+                            })
+                        ]
+                    });
+                }
+                catch {
+                    collector.stop();
+                }
+            });
         }
 
     }
