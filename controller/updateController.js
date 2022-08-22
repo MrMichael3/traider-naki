@@ -46,7 +46,8 @@ const checkForUpdates = async () => {
                     break;
                 case "atTraining":
                     const xpBefore = user.unit.xp;
-                    await trainingReward(user);
+                    const xpReward = await trainingReward(user);
+                    console.log(`user ${user.username} got ${xpReward}xp`);
                     const userAfterReward = await User.findOne({ discord_id: user.discord_id, guild_id: user.guild_id });
                     await levelUp(userAfterReward, xpBefore);
                     //TODO: send notification to chosen channel. server admin has to select a message channel for the bot
