@@ -45,7 +45,7 @@ function createEmbeds(user) {
 	strongAgainst = unitStats.starterUnits.find(x => x.id === unitId).strongAgainst;
 	weakAgainst = unitStats.starterUnits.find(x => x.id === unitId).weakAgainst;
 	let statusWithTime = user.status;
-	const l = ["atTraining", "atQuest"];
+	const l = ["atTraining", "atQuest", "unconscious"];
 	if (l.includes(user.status)) {
 		statusWithTime += ` (${readableTime(user.status_time - Date.now())})`;
 	}
