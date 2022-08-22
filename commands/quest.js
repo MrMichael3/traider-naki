@@ -838,8 +838,8 @@ module.exports = {
                         user.status = "atQuest";
                         user.status_time = Date.now() + user.quest[0].duration * 1000;
                         //reply
-                        await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
                         await user.save();
+                        await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
                     }
                     catch {
                         console.log(`error at quest selection with user: ${i.user.id} != ${interaction.user.id}`);
