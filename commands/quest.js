@@ -842,7 +842,7 @@ module.exports = {
                         await user.save();
                     }
                     catch {
-                        console.log(`error at quest selection`);
+                        console.log(`error at quest selection with user: ${i.user.id} != ${interaction.user.id}`);
                     }
                     finally {
                         collector.stop();
