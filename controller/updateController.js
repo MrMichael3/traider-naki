@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
 const User = require('./../User.js');
+const Guild = require('./../schemas/Guild.js');
 const { trainingReward } = require('./../commands/training.js');
 const { levelUp } = require('./unitLevel.js');
 
@@ -9,7 +9,9 @@ const healPercentage = 0.1 //percentage of maxHealth healed
 const healableStatus = ["idle", "atTraining"];
 const statusWithEndTime = ["atQuest", "atEvent", "atTraining", "unconscious"];
 let lastHour = new Date().getHours();
-const checkForUpdates = async () => {
+
+
+const checkForUpdates = async (client) => {
     let newHour = new Date().getHours();
     if (newHour != lastHour) {
         //heal users every hour
@@ -17,7 +19,7 @@ const checkForUpdates = async () => {
         for (let user of healableUsers) {
             try {
                 //heal the user
-                user.unit.current_health = Math.min(user.unit.max_health, Math.round(user.unit.current_health + user.unit.max_health* healPercentage));
+                user.unit.current_health = Math.min(user.unit.max_health, Math.round(user.unit.current_health + user.unit.max_health * healPercentage));
                 await user.save();
             }
             catch {
@@ -47,10 +49,24 @@ const checkForUpdates = async () => {
                 case "atTraining":
                     const xpBefore = user.unit.xp;
                     const xpReward = await trainingReward(user);
-                    console.log(`user ${user.username} got ${xpReward}xp`);
-                    const userAfterReward = await User.findOne({ discord_id: user.discord_id, guild_id: user.guild_id });
-                    await levelUp(userAfterReward, xpBefore);
-                    //TODO: send notification to chosen channel. server admin has to select a message channel for the bot
+                    const userAfterReward = await User.findOne({ discord_id: user.discord_id, guild_id: user.guild_id }).exec();
+                    const guild = await Guild.findOne({ id: user.guild_id }).exec();
+
+                    if (guild && guild.channel) {
+                        try {
+                            const targetChannel = client.channels.cache.get(guild.channel);
+                            await targetChannel.send(`<@${user.discord_id}> has finished his training and received ${xpReward}XP!`);
+                            await levelUp(userAfterReward, xpBefore, targetChannel);
+
+                        }
+                        catch {
+                            await levelUp(userAfterReward, xpBefore);
+                            console.log(`targetChannel of guild ${client.guild} not reachable`);
+                        }
+                    }
+                    else {
+                        await levelUp(userAfterReward, xpBefore);
+                    }
                     break;
                 case "unconscious":
                     //set status to idle, change currentHealth
@@ -67,6 +83,6 @@ const checkForUpdates = async () => {
             await user.save();
         }
     }
-    setTimeout(checkForUpdates, 1000 * 10);
+    setTimeout(() => checkForUpdates(client), 1000);
 }
 module.exports = { checkForUpdates };

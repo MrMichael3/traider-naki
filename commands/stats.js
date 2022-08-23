@@ -67,6 +67,7 @@ function createEmbeds(user) {
 module.exports = {
 	data: new SlashCommandBuilder()
 		.setName('stats')
+		.setDMPermission(false)
 		.setDescription('get stats of yourself or another user')
 		.addUserOption((option) => option.setName('user').setDescription('user')),
 	async execute(interaction) {

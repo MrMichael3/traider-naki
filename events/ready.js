@@ -13,6 +13,6 @@ module.exports = {
             console.log(err);
         })
         console.log(`Ready! Logged in as ${client.user.tag}`);
-        checkForUpdates();
+        checkForUpdates(client);
     },
 };
