@@ -13,6 +13,7 @@ function calculateReward(streak) {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('mine')
+        .setDMPermission(false)
         .setDescription('mine soulstone daily'),
     async execute(interaction) {
         const getUser = await User.findOne({ discord_id: interaction.user.id, guild_id: interaction.guildId }).exec();

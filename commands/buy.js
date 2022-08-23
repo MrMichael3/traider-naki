@@ -8,6 +8,7 @@ module.exports = {
     data: new SlashCommandBuilder()
         .setName('buy')
         .setDescription('Buy certain item from the shop')
+        .setDMPermission(false)
         .addStringOption(option => option
             .setName('item')
             .setDescription('item name')

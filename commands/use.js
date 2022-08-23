@@ -9,6 +9,7 @@ const emojis = require('./../emojis.json');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('use')
+        .setDMPermission(false)
         .setDescription('use an item')
         .addStringOption(option => option
             .setName('item')

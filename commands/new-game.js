@@ -10,6 +10,7 @@ const emojis = require(`./../emojis.json`);
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('new-game')
+        .setDMPermission(false)
         .setDescription('Delete your progress and restart'),
     async execute(interaction) {
         //check if player is in Expelsia

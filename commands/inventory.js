@@ -14,6 +14,7 @@ function beautifyUnitName(unitType) {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('inventory')
+        .setDMPermission(false)
         .setDescription('Show your items and soulstones'),
     async execute(interaction) {
 

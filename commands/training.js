@@ -56,6 +56,7 @@ function remainingTime(d) {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('training')
+        .setDMPermission(false)
         .setDescription('A save way to gain experience. Training last 6 hours.'),
     async execute(interaction) {
         //check user status

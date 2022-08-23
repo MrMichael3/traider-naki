@@ -104,6 +104,7 @@ async function checkIfUserExists(userId, guildId) {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('start')
+        .setDMPermission(false)
         .setDescription('the beginning of your journey in Expelsia'),
     async execute(interaction) {
         const embedsList = createEmbeds();

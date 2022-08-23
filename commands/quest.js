@@ -771,6 +771,7 @@ function createDescription(user, quest, stage, enemy, success, rewards) {
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('quest')
+        .setDMPermission(false)
         .setDescription('Start a quest and get rewards'),
 
     async execute(interaction) {
