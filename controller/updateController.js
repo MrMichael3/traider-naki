@@ -32,6 +32,16 @@ const checkForUpdates = async (client) => {
     const results = await User.find({ status: { $in: statusWithEndTime }, status_time: { $lte: Date.now() } });
     for (let x in results) {
         const user = results[x];
+        const guild = await Guild.findOne({ id: user.guild_id }).exec();
+        let targetChannel;
+        if (guild && guild.channel) {
+            try {
+                targetChannel = client.channels.cache.get(guild.channel);
+            }
+            catch {
+                targetChannel = false;
+            }
+        }
         try {
             //set action based on state
             switch (user.status) {
@@ -39,6 +49,14 @@ const checkForUpdates = async (client) => {
                     //set status to endQuest
                     user.status = "endQuest";
                     await user.save();
+                    if (targetChannel) {
+                        try {
+                            await targetChannel.send(`<@${user.discord_id}> returned from his quest journey. Type */quest* to see if you were successful.`);
+                        }
+                        catch {
+                            console.log(`targetChannel of guild ${client.guild} not reachable`);
+                        }
+                    }
                     break;
                 case "atEvent":
                     //set status to idle, give event rewards
@@ -50,14 +68,11 @@ const checkForUpdates = async (client) => {
                     const xpBefore = user.unit.xp;
                     const xpReward = await trainingReward(user);
                     const userAfterReward = await User.findOne({ discord_id: user.discord_id, guild_id: user.guild_id }).exec();
-                    const guild = await Guild.findOne({ id: user.guild_id }).exec();
 
-                    if (guild && guild.channel) {
+                    if (targetChannel) {
                         try {
-                            const targetChannel = client.channels.cache.get(guild.channel);
                             await targetChannel.send(`<@${user.discord_id}> has finished his training and received ${xpReward}XP!`);
                             await levelUp(userAfterReward, xpBefore, targetChannel);
-
                         }
                         catch {
                             await levelUp(userAfterReward, xpBefore);
@@ -73,6 +88,14 @@ const checkForUpdates = async (client) => {
                     user.status = "idle";
                     user.unit.current_health = user.unit.max_health;
                     await user.save();
+                    if (targetChannel) {
+                        try {
+                            await targetChannel.send(`<@${user.discord_id}> has fully recovered and is ready for new adventures.`);
+                        }
+                        catch {
+                            console.log(`targetChannel of guild ${client.guild} not reachable`);
+                        }
+                    }
                     break;
             }
         }
