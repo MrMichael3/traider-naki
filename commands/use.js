@@ -62,7 +62,7 @@ module.exports = {
                 const successfullyHealed = await healUnit(user, usedItem.effect);
                 if (!successfullyHealed) {
                     await interaction.reply({
-                        content: `Could not heal. You can only heal yourself when you are idle or at training and not already have full health.`
+                        content: `Could not heal. You can't heal yourself when unconscious or at full health.`
                     });
                     return;
                 }
