@@ -1,6 +1,6 @@
 
 const healUnit = async (user, amount, daily = false) => {
-    const notHealableStatus = ["unconscious", "atQuest", "endQuest", "atEvent"];
+    const notHealableStatus = ["unconscious"];
     if (notHealableStatus.includes(user.status)) {
         //can't heal user
         return false;

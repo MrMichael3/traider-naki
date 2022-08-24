@@ -23,6 +23,10 @@ module.exports = {
         //check if user can buy the item
         try {
             const user = await User.findOne({ discord_id: interaction.user.id, guild_id: interaction.guildId });
+            if(user.status == "atQuest" || user.status == "atEvent"){
+                interaction.reply({content: `You can't buy something from the shop while you are far away!`});
+                return;
+            }
             if (user.soulstones < item['cost']) {
                 interaction.reply({ content: `You don't have enough Soulstones to buy this item!` });
                 return;
