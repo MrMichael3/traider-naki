@@ -9,7 +9,13 @@ const GuildSchema = new mongoose.Schema({
     name: {
         type: String
     },
-    channel: String, //which channel the bot can send a message 
-    default: ""
+    channel: {
+        type: String, //which channel the bot can send a message 
+        default: ""
+    },
+    allowsRoles: {
+        type: Boolean,
+        default: true
+    }
 });
 module.exports = mongoose.model("Guild", GuildSchema);

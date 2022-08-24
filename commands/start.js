@@ -1,5 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const User = require('./../User');
+const Guild = require('./../schemas/Guild');
 const mongoose = require('mongoose');
 const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
 const unitData = require('./../unitStats.json');
@@ -117,8 +118,7 @@ module.exports = {
         }
         else {
             await interaction.reply({
-                content: `Hello <@${interaction.user.id}> \n This is the beginning of your journey in Expelsia! First, chose your origin. You can chose between four units, but chose wisely, as this can't be changed afterwards. Read the information about the units first before you chose. \n In Expelsia you have to stand up to wild creatures as well as to other players.`,
-                ephemeral: true
+                content: `Hello <@${interaction.user.id}> \n This is the beginning of your journey in Expelsia! First, chose your origin. You can chose between four units, but chose wisely, as this can't be changed afterwards. Read the information about the units first before you chose. \n In Expelsia you have to stand up to wild creatures as well as to other players.`
             });
             const row = new MessageActionRow()
                 .addComponents(
@@ -169,7 +169,7 @@ module.exports = {
                     return;
                 }
                 else {
-                    await i.update({ content: `<@${interaction.user.id}> chose ${chosenUnitName} ${chosenUnitEmoji}.`, embeds: [], components: [] });
+                    await i.update({ content: `<@${interaction.user.id}> chose ${chosenUnitName} ${chosenUnitEmoji}.`, embeds: [], components: [], ephemeral: false });
                     //create db entry
                     const newUser = {
                         "id": interaction.user.id,
@@ -179,6 +179,11 @@ module.exports = {
                     }
                     const addedNewUser = await handleNewUser(newUser);
                     if (!addedNewUser) { return console.log(`User ${newUser.id} couldn't be added!`); }
+                    //give the role Expelsia to the user
+                    const expelsiaRole = interaction.guild.roles.cache.find(role => role.name === "Expelsia");
+                    if (expelsiaRole) {
+                        interaction.guild.members.cache.get(interaction.user.id).roles.add(expelsiaRole);
+                    }
                     collector.stop();
                 }
             });
