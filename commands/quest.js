@@ -15,6 +15,7 @@ const durationPeriod = 36000 //period of quest duration in seconds
 const uncommonArtifactChance = 0.1;
 const rareArtifactChance = 0.2;
 const legendaryArtifactChance = 0.2;
+const itemChance = 0.4;
 const soulstoneMultiplier = 500; // multiplier * duration/maxDuration * difficulty = base soulstone reward
 const xpMultiplier = 10; // multiplier^level = base xp reward
 
@@ -923,9 +924,21 @@ module.exports = {
                             stageRewards.combatXp = combatRewards.xp;
                             //artifact reward
                             questType = currentQuest.type;
-                            if (combatStage === 3 && questType === "treasure hunter") {
+                            let artifactChance = 1;
+                            if (combatStage === 3) {
                                 //check for artifact
-                                let uncommonChance = uncommonArtifactChance * (user.quest.difficulty - 1) * (user.quest.duration / (durationPeriod + minDuration) + 1);
+                                switch (questType) {
+                                    case "treasure hunter":
+                                        artifactChance = 1;
+                                        break;
+                                    case "exploration":
+                                        artifactChance = 0.5;
+                                        break;
+                                    case "combat":
+                                        artifactChance = 0.25;
+                                        break;
+                                }
+                                let uncommonChance = Math.max(0, uncommonArtifactChance * artifactChance * (user.quest.difficulty - 1) * (user.quest.duration / (durationPeriod + minDuration) + 1));
                                 let artifactTier = 0;
                                 if (Math.random() < uncommonChance) {
                                     console.log(`artifact t1`)
@@ -961,10 +974,11 @@ module.exports = {
                                         consumable: false
                                     })
                                 }
+                                //TODO: chance of getting one item in stage 3. Value of item depends on difficulty, length and player level.
+
                             }
                         }
                         //add reward of this stage
-
                     }
                     rewards.push(stageRewards);
                     //create description
