@@ -36,6 +36,7 @@ const userSchema = new mongoose.Schema({
     inventory: [
         {
             item_name: String,
+            item_type: String,
             amount: Number,
             consumable: Boolean
         }

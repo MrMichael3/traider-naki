@@ -23,8 +23,8 @@ module.exports = {
         //check if user can buy the item
         try {
             const user = await User.findOne({ discord_id: interaction.user.id, guild_id: interaction.guildId });
-            if(user.status == "atQuest" || user.status == "atEvent"){
-                interaction.reply({content: `You can't buy something from the shop while you are far away!`});
+            if (user.status == "atQuest" || user.status == "atEvent") {
+                interaction.reply({ content: `You can't buy something from the shop while you are far away!` });
                 return;
             }
             if (user.soulstones < item['cost']) {
@@ -44,17 +44,18 @@ module.exports = {
             else {
                 const newItemInInventory = {
                     item_name: item.name,
-                    item_id: item.item_id,
+                    item_type: item.item_type,
                     amount: 1,
                     consumable: item.consumable
                 }
                 user.inventory.push(newItemInInventory);
+
             }
             await user.save();
             interaction.reply({ content: `Successfully bought ${item.name}` });
         }
-        catch {
-            interaction.reply({ content: "Something went wrong!" });
+        catch (err) {
+            console.error(err);
         }
     }
 };
