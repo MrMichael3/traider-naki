@@ -53,23 +53,7 @@ async function createEmbeds(start = 0) {
         availableItems.push({ name: "collectibles", value: "*rare collectibles*" });
         availableItems = availableItems.concat(collectibleItems);
     }
-    /*
-    const shopPages = [];
-    while (availableItems.length) {
-        if (availableItems.length > itemsPerShopPage) {
-            //no more than 15 items per shop page
-            let i = availableItems.slice(0, itemsPerShopPage);
-            shopPages.push(i);
-            availableItems = availableItems.slice(itemsPerShopPage);
-        }
-        else {
-            shopPages.push(availableItems);
-            availableItems = [];
-        }
-    }*/
-
     const currentPage = availableItems.slice(start, start + itemsPerShopPage - 1);
-
     const shopEmbed = new MessageEmbed()
         .setTitle(`Traider Naki's Shop`)
         .setThumbnail(thumbnail)
