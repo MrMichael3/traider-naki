@@ -14,9 +14,9 @@ async function createEmbeds(start = 0) {
     let availableItems = [];
     //iterate through items and add to the array
     const healItems = [];
-    const artifactItems = [];
+    const collectibleItems = [];
     for await (const item of Item.find({ buyable: true })) {
-        switch (item.type) {
+        switch (item.item_type) {
             case "heal":
                 healItems.push({ name: `${item.name} - ${item.cost} ${emojis.soulstone}`, value: `${item.description_short}`, cost: item.cost });
                 break;
@@ -24,39 +24,36 @@ async function createEmbeds(start = 0) {
                 healItems.push({ name: `${item.name} - ${item.cost} ${emojis.soulstone}`, value: `${item.description_short}`, cost: item.cost });
                 break;
             case "collectible":
-                artifactItems.push({ name: `${item.name} - ${item.cost} ${emojis.soulstone}`, value: `${item.description_short}`, cost: item.cost });
+                let rarity = "";
+                if (item.effect === 1) {
+                    rarity = "uncommon";
+                }
+                else if (item.effect === 2) {
+                    rarity = "rare";
+                }
+                else if (item.effect === 3) {
+                    rarity = "epic";
+                }
+                else if (item.effect === 4) {
+                    rarity = "legendary";
+                }
+                collectibleItems.push({ name: `${item.name} - ${item.cost} ${emojis.soulstone}`, value: `Rarity: **${rarity}**\n${item.description_short}`, cost: item.cost });
                 break;
         }
     }
     healItems.sort((a, b) => {
         return a.cost - b.cost;
     });
-    artifactItems.sort((a, b) => {
+    collectibleItems.sort((a, b) => {
         return a.cost - b.cost;
     });
     availableItems.push({ name: "Healing Items", value: "*can heal or revive you*" });
     availableItems = availableItems.concat(healItems);
-    if (artifactItems.length != 0) {
-        availableItems.push({ name: "Artifacts", value: "*rare collectable artifacts*" });
-        availableItems = availableItems.concat(artifactItems);
+    if (collectibleItems.length != 0) {
+        availableItems.push({ name: "collectibles", value: "*rare collectibles*" });
+        availableItems = availableItems.concat(collectibleItems);
     }
-    /*
-    const shopPages = [];
-    while (availableItems.length) {
-        if (availableItems.length > itemsPerShopPage) {
-            //no more than 15 items per shop page
-            let i = availableItems.slice(0, itemsPerShopPage);
-            shopPages.push(i);
-            availableItems = availableItems.slice(itemsPerShopPage);
-        }
-        else {
-            shopPages.push(availableItems);
-            availableItems = [];
-        }
-    }*/
-
     const currentPage = availableItems.slice(start, start + itemsPerShopPage - 1);
-
     const shopEmbed = new MessageEmbed()
         .setTitle(`Traider Naki's Shop`)
         .setThumbnail(thumbnail)
@@ -69,10 +66,7 @@ async function createEmbeds(start = 0) {
 function createItemEmbeds(item) {
     // An embed message with details of selected item
     const embeds = [];
-    var itemType = "Artifact";
-    if (item.consumable) {
-        itemType = "Consumable";
-    }
+    var itemType = item.item_type;
     const itemEmbed = new MessageEmbed()
         .setTitle(`${item.name}`)
         .setDescription(`${item.description_long}`)

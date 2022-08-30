@@ -17,26 +17,36 @@ module.exports = {
         .setDMPermission(false)
         .setDescription('Show your items and soulstones'),
     async execute(interaction) {
-
-
         const user = await User.findOne({ discord_id: interaction.user.id, guild_id: interaction.guildId });
-        const artifacts = await Item.find({ consumable: false }).exec();
-
-        var amountOfArtifacts = 0;
-        var userArtifacts = 0;
+        const collectibles = await Item.find({ type: "collectible" }).exec();
+        var amountOfCollectibles = 0;
+        var userCollectibles = 0;
         var consumableItems = "";
         var staticItems = "";
-        if (artifacts) {
-            //update how many artifacts exists
-            amountOfArtifacts = artifacts.length;
+        if (collectibles) {
+            //update how many collectibles exists
+            amountOfCollectibles = collectibles.length;
         }
         try {
             for (const item of user.inventory) {
-                //create a string of all artifacts the user has
-                if (!item.consumable) {
-                    let itemString = `**${item.item_name}**\n`;
+                //create a string of all collectibles the user has
+                if (item.type === "collectible") {
+                    let rarity = "";
+                    if (item.effect === 1) {
+                        rarity = "uncommon";
+                    }
+                    else if (item.effect === 2) {
+                        rarity = "rare";
+                    }
+                    else if (item.effect === 3) {
+                        rarity = "epic";
+                    }
+                    else if (item.effect === 4) {
+                        rarity = "legendary";
+                    }
+                    let itemString = `**${item.item_name} (${rarity})**\n`;
                     staticItems = staticItems + itemString;
-                    userArtifacts += 1;
+                    userCollectibles += 1;
                 }
                 if (item.consumable) {
                     //create a string of all consumable items the user has
@@ -65,7 +75,7 @@ module.exports = {
         }
         const itemsList = [
             { name: 'Consumables', value: `${consumableItems}` },
-            { name: `Artifacts ${userArtifacts}/${amountOfArtifacts}`, value: `${staticItems}` }
+            { name: `Collectibles ${userCollectibles}/${amountOfCollectibles}`, value: `${staticItems}` }
 
         ];
 

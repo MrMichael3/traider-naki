@@ -36,7 +36,7 @@ client.on('interactionCreate', async interaction => {
 		console.log("Something wrong with the latest interaction");
 	}
 	//check if user exists already (exclude commands where no user is needed)
-	const excludedCommands = ["start", "stats", "help", "shop"];
+	const excludedCommands = ["start", "stats", "help", "shop", "botchannel", "role"];
 	if (!excludedCommands.includes(command.data.name) && !await User.findOne({ discord_id: interaction.user.id, guild_id: interaction.guildId }).exec()) {
 		await interaction.reply({ content: "You have not selected your origin yet! Type '/start' to begin your adventure in Expelsia." });
 		return;

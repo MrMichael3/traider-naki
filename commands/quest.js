@@ -12,9 +12,10 @@ const { getUnitLevel, statsMultiplier, levelUp } = require('./../controller/unit
 const statsMultiplierPercentage = (statsMultiplier + 100) / 100;
 const minDuration = 3600 //minimum duration of quests in seconds
 const durationPeriod = 36000 //period of quest duration in seconds
-const uncommonArtifactChance = 0.1;
-const rareArtifactChance = 0.2;
-const legendaryArtifactChance = 0.2;
+const uncommonCollectibleChance = 0.1;
+const rareCollectibleChance = 0.2;
+const legendaryCollectibleChance = 0.2;
+const itemChance = 0.4;
 const soulstoneMultiplier = 500; // multiplier * duration/maxDuration * difficulty = base soulstone reward
 const xpMultiplier = 10; // multiplier^level = base xp reward
 
@@ -369,17 +370,17 @@ function createReportSummaryEmbed(user, rewards) {
     }
     let xpReward = 0;
     let soulstoneReward = 0;
-    let artifactReward = "-";
+    let CollectibleReward = "-";
     let defeatedEnemies = "-";
 
     //set rewards
     let stageCounter = 1;
     for (stage of rewards) {
-        //set xp, soulstone and artifact reward per stage and add defeated enemy
+        //set xp, soulstone and Collectible reward per stage and add defeated enemy
         xpReward += stage.baseXp + stage.combatXp;
         soulstoneReward += stage.baseSoulstone + stage.combatSoulstone;
-        if (stage.artifact != "") {
-            artifactReward = stage.artifact
+        if (stage.Collectible != "") {
+            CollectibleReward = stage.Collectible
         }
         if (stage.success) {
             const enemy = user.quest[0].enemies.find(x => x.stage === stageCounter);
@@ -401,7 +402,7 @@ function createReportSummaryEmbed(user, rewards) {
         .addFields(
             { name: `Status`, value: status },
             { name: `Your stats`, value: `Health: ${user.unit.current_health}/${user.unit.max_health}${emojis.defensive}\nAttack: ${user.unit.min_attack}${emojis.offensive} - ${user.unit.max_attack}${emojis.offensive}\nXP: ${user.unit.xp}`, inline: true },
-            { name: 'Rewards', value: `Xp: ${xpReward}\nSoulstone: ${soulstoneReward}${emojis.soulstone}\nArtifact: ${artifactReward}`, inline: true },
+            { name: 'Rewards', value: `Xp: ${xpReward}\nSoulstone: ${soulstoneReward}${emojis.soulstone}\nCollectible: ${CollectibleReward}`, inline: true },
             { name: 'Defeated enemies', value: defeatedEnemies, inline: true }
         );
     embeds.push(summaryEmbed);
@@ -786,6 +787,7 @@ module.exports = {
         //messageCollector
         const filter = (int) => {
             if (int.user.id === interaction.user.id) {
+                console.log(`custom id: ${int.customId}`)
                 return true;
             }
             return int.reply({ content: `You can't use this button!`, ephemeral: true });
@@ -833,20 +835,19 @@ module.exports = {
                 collector.on('collect', async i => {
                     try {
                         const chosenQuest = Number(i.customId);
-                        //delete the other quests
-                        user.quest = [user.quest[chosenQuest]];
-                        //set status and status time
-                        user.status = "atQuest";
-                        user.status_time = Date.now() + user.quest[0].duration * 1000;
-                        //reply
-                        await user.save();
-                        await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
+                        if (Number.isInteger(chosenQuest)) {
+                            //delete the other quests
+                            user.quest = [user.quest[chosenQuest]];
+                            //set status and status time
+                            user.status = "atQuest";
+                            user.status_time = Date.now() + user.quest[0].duration * 1000;
+                            //reply
+                            await user.save();
+                            await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
+                        }
                     }
-                    catch {
-                        console.log(`error at quest selection with user: ${i.user.id} != ${interaction.user.id}`);
-                    }
-                    finally {
-                        collector.stop();
+                    catch (err) {
+                        console.error(err);
                     }
                 });
                 break;
@@ -872,7 +873,6 @@ module.exports = {
                 return;
             case 'endQuest':
                 if (user.status_time > Date.now() && user.quest.length === 1) {
-                    console.log("Quest is still ongoing!");
                     user.status = "atQuest";
                     await user.save();
                     await interaction.reply({ content: `The quest **${user.quest[0].title}** is still ongoing! Come back in **${readableTime(user.status_time - Date.now())}**.` });
@@ -900,7 +900,7 @@ module.exports = {
                     //base rewards per stage
                     let baseSoulstone = Math.round((soulstoneMultiplier * (user.quest[0].duration / (durationPeriod + minDuration) * user.quest[0].difficulty)) / 3);
                     let baseXp = Math.round((xpMultiplier * Math.pow(1.1, userLvl)) / 3);
-                    let stageRewards = { baseSoulstone: baseSoulstone, baseXp: baseXp, combatSoulstone: 0, combatXp: 0, artifact: "", success: true };
+                    let stageRewards = { baseSoulstone: baseSoulstone, baseXp: baseXp, combatSoulstone: 0, combatXp: 0, Collectible: "", success: true };
 
                     const currentQuest = await Quest.findOne({ title: user.quest[0].title }).exec();
                     let combatReport = {};
@@ -921,50 +921,63 @@ module.exports = {
                             var combatRewards = getRewards(user, combatStage);
                             stageRewards.combatSoulstone = combatRewards.soulstone;
                             stageRewards.combatXp = combatRewards.xp;
-                            //artifact reward
+                            //Collectible reward
                             questType = currentQuest.type;
-                            if (combatStage === 3 && questType === "treasure hunter") {
-                                //check for artifact
-                                let uncommonChance = uncommonArtifactChance * (user.quest.difficulty - 1) * (user.quest.duration / (durationPeriod + minDuration) + 1);
-                                let artifactTier = 0;
+                            let CollectibleChance = 1;
+                            if (combatStage === 3) {
+                                //check for Collectible
+                                switch (questType) {
+                                    case "treasure hunter":
+                                        CollectibleChance = 1;
+                                        break;
+                                    case "exploration":
+                                        CollectibleChance = 0.5;
+                                        break;
+                                    case "combat":
+                                        CollectibleChance = 0.25;
+                                        break;
+                                }
+                                let uncommonChance = Math.max(0, uncommonCollectibleChance * CollectibleChance * (user.quest.difficulty - 1) * (user.quest.duration / (durationPeriod + minDuration) + 1));
+                                let CollectibleTier = 0;
                                 if (Math.random() < uncommonChance) {
-                                    console.log(`artifact t1`)
-                                    artifactTier = 1;
-                                    if (Math.random() < rareArtifactChance) {
-                                        console.log(`artifact t2`)
-                                        artifactTier = 2
-                                        if (Math.random() < legendaryArtifactChance) {
-                                            console.log(`artifact t3`)
-                                            artifactTier = 3;
+                                    console.log(`Collectible t1`)
+                                    CollectibleTier = 1;
+                                    if (Math.random() < rareCollectibleChance) {
+                                        console.log(`Collectible t2`)
+                                        CollectibleTier = 2
+                                        if (Math.random() < legendaryCollectibleChance) {
+                                            console.log(`Collectible t3`)
+                                            CollectibleTier = 3;
                                         }
                                     }
                                 }
-                                if (artifactTier) {
-                                    //find random artifact
-                                    const artifacts = await Item.findMany({ consumable: false, effect: artifactTier }).exec();
+                                if (CollectibleTier) {
+                                    //find random Collectible
+                                    const Collectibles = await Item.findMany({ consumable: false, effect: CollectibleTier }).exec();
                                     for (let item in user.inventory) {
-                                        artifacts.forEach(artifact => {
-                                            if (artifact.name === item.item_name) {
-                                                //remove artifacts that are already in players posession
-                                                artifacts = artifacts.filter(a => a.name != artifact.name);
+                                        Collectibles.forEach(Collectible => {
+                                            if (Collectible.name === item.item_name) {
+                                                //remove Collectibles that are already in players posession
+                                                Collectibles = Collectibles.filter(a => a.name != Collectible.name);
                                             }
                                         });
                                     }
-                                    const artifactCounter = artifacts.length;
-                                    const random = Math.floor(Math.random() * artifactCounter);
-                                    const rewardedArtifact = artifacts[random];
-                                    stageRewards.artifact = rewardedArtifact;
-                                    //add artifact to inventory
+                                    const CollectibleCounter = Collectibles.length;
+                                    const random = Math.floor(Math.random() * CollectibleCounter);
+                                    const rewardedCollectible = Collectibles[random];
+                                    stageRewards.Collectible = rewardedCollectible;
+                                    //add Collectible to inventory
                                     user.inventory.push({
-                                        item_name: rewardedArtifact.name,
+                                        item_name: rewardedCollectible.name,
                                         amount: 1,
                                         consumable: false
                                     })
                                 }
+                                //TODO: chance of getting one item in stage 3. Value of item depends on difficulty, length and player level.
+
                             }
                         }
                         //add reward of this stage
-
                     }
                     rewards.push(stageRewards);
                     //create description
@@ -1006,6 +1019,9 @@ module.exports = {
                 await interaction.reply({ embeds: embedReport[stageCounter - 1], components: [reportRow] });
                 const reportCollector = interaction.channel.createMessageComponentCollector({ filter, time: 120000 });
                 reportCollector.on('collect', async i => {
+                    if (i.customId != "next") {
+                        return;
+                    }
                     stageCounter++;
                     try {
                         i.deferUpdate();
@@ -1018,8 +1034,8 @@ module.exports = {
                             reportCollector.stop();
                         }
                     }
-                    catch {
-                        console.log(`interaction with arrow button at quest report not possible!`);
+                    catch (err) {
+                        console.error(err);
                     }
                 });
                 await levelUp(user, xpBefore, interaction.channel);

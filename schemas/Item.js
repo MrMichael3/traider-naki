@@ -25,7 +25,7 @@ const ItemSchema = new mongoose.Schema({
         type: Boolean,
         default: true
     },
-    type: {
+    item_type: {
         type: String
     },
     effect: {
