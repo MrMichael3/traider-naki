@@ -787,6 +787,7 @@ module.exports = {
         //messageCollector
         const filter = (int) => {
             if (int.user.id === interaction.user.id) {
+                console.log(`custom id: ${int.customId}`)
                 return true;
             }
             return int.reply({ content: `You can't use this button!`, ephemeral: true });
@@ -834,20 +835,19 @@ module.exports = {
                 collector.on('collect', async i => {
                     try {
                         const chosenQuest = Number(i.customId);
-                        //delete the other quests
-                        user.quest = [user.quest[chosenQuest]];
-                        //set status and status time
-                        user.status = "atQuest";
-                        user.status_time = Date.now() + user.quest[0].duration * 1000;
-                        //reply
-                        await user.save();
-                        await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
+                        if (Number.isInteger(chosenQuest)) {
+                            //delete the other quests
+                            user.quest = [user.quest[chosenQuest]];
+                            //set status and status time
+                            user.status = "atQuest";
+                            user.status_time = Date.now() + user.quest[0].duration * 1000;
+                            //reply
+                            await user.save();
+                            await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
+                        }
                     }
-                    catch {
-                        console.log(`error at quest selection with user: ${i.user.id} != ${interaction.user.id}`);
-                    }
-                    finally {
-                        collector.stop();
+                    catch (err) {
+                        console.error(err);
                     }
                 });
                 break;
@@ -873,7 +873,6 @@ module.exports = {
                 return;
             case 'endQuest':
                 if (user.status_time > Date.now() && user.quest.length === 1) {
-                    console.log("Quest is still ongoing!");
                     user.status = "atQuest";
                     await user.save();
                     await interaction.reply({ content: `The quest **${user.quest[0].title}** is still ongoing! Come back in **${readableTime(user.status_time - Date.now())}**.` });
@@ -1020,6 +1019,9 @@ module.exports = {
                 await interaction.reply({ embeds: embedReport[stageCounter - 1], components: [reportRow] });
                 const reportCollector = interaction.channel.createMessageComponentCollector({ filter, time: 120000 });
                 reportCollector.on('collect', async i => {
+                    if (i.customId != "next") {
+                        return;
+                    }
                     stageCounter++;
                     try {
                         i.deferUpdate();
@@ -1032,8 +1034,8 @@ module.exports = {
                             reportCollector.stop();
                         }
                     }
-                    catch {
-                        console.log(`interaction with arrow button at quest report not possible!`);
+                    catch (err) {
+                        console.error(err);
                     }
                 });
                 await levelUp(user, xpBefore, interaction.channel);
