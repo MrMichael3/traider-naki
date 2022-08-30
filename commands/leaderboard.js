@@ -33,7 +33,7 @@ async function createEmbed(members, filterOption) {
             memberFields.push({ name: `_____________`, value: ` users: ${members.length} ` })
         }
         catch (err) {
-            console.error(err);
+            console.error(`error at leaderboard creation with xp/origin\n${err}`);
         }
     }
     else if (filterOption === "collectible") {
@@ -143,7 +143,7 @@ module.exports = {
                 return b.unit.xp - a.unit.xp;
             });
             //create embed
-            const embedMessage = createEmbed(allMembers, "xp");
+            const embedMessage = await createEmbed(allMembers, "xp");
             await interaction.reply({ embeds: embedMessage });
         }
         else if (choice === "collectible") {
