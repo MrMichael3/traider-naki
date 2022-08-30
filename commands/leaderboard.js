@@ -4,14 +4,13 @@ const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageEmbed } = require('discord.js');
 const { getUnitLevel, xpOfLevel } = require('./../controller/unitLevel.js');
 
-function createEmbed(members, filterOption) {
+async function createEmbed(members, filterOption) {
     if (members.length === 0) {
         return;
     }
     const embeds = [];
     const memberFields = [];
     if (filterOption === "xp" || filterOption === "origin") {
-        console.log("hi")
         let rank = 1;
         let prevRank = 1;
         try {
@@ -37,9 +36,59 @@ function createEmbed(members, filterOption) {
             console.error(err);
         }
     }
+    else if (filterOption === "collectible") {
+        try {
+            for (let x = 0; x < members.length && x < 20; x++) {
+                const name = members[x].username.split('#')[0];
+                let collectibleText = "";
+                let uncommon = 0;
+                let rare = 0;
+                let epic = 0;
+                let legendary = 0;
+                //iterate through item and count them
+                for (let item of members[x].inventory) {
+                    if (item.item_type === "collectible") {
+                        const fullItem = await Item.findOne({ name: item.item_name });
+                        switch (fullItem.effect) {
+                            case 1:
+                                uncommon++;
+                                break;
+                            case 2:
+                                rare++;
+                                break;
+                            case 3:
+                                epic++;
+                                break;
+                            case 4:
+                                legendary++;
+                                break;
+                        }
+                    }
+                }
+                if (uncommon > 0) {
+                    collectibleText = `uncommon: ${uncommon}`;
+                }
+                if (rare > 0) {
+                    collectibleText += `, rare: ${rare}`;
+                }
+                if (epic > 0) {
+                    collectibleText += `, epic: ${epic}`;
+                }
+                if (legendary > 0) {
+                    collectibleText += `, legendary: ${legendary}`;
+                }
+                if (uncommon + rare + epic + legendary === 0) {
+                    collectibleText = `no collectibles found yet`;
+                }
+                memberFields.push({ name: `${name}`, value: `${collectibleText}` });
+            }
+        }
+        catch (err) {
+            console.error(err);
+        }
+    }
     let title = "Leaderboard";
     if (filterOption === "origin") {
-        console.log("filter origin")
         switch (members[0].unit.unit_type) {
             case "druidNaki":
                 title += ` Druid Nakis`;
@@ -55,6 +104,9 @@ function createEmbed(members, filterOption) {
                 break;
         }
     }
+    else if (filterOption === "collectible") {
+        title = "Leaderboard of collectibles"
+    }
     const leaderboardEmbed = new MessageEmbed()
         .setTitle(title)
         .addFields(memberFields);
@@ -67,19 +119,18 @@ module.exports = {
         .setDMPermission(false)
         .setDescription('Show all members of Expelsia')
         .addStringOption(option => option
-            .setName('sort')
-            .setDescription('filter')
+            .setName('filter')
+            .setDescription('filter for origin or collectibles')
             .addChoices(
                 { name: 'xp', value: 'xp' },
                 { name: 'Druid Naki', value: 'druidNaki' },
                 { name: 'Guard Naki', value: 'guardNaki' },
                 { name: 'Forest Spirit', value: 'forestSpirit' },
                 { name: 'Elder Spirit', value: 'elderSpirit' },
-
                 { name: 'collectible', value: 'collectible' }
             )),
     async execute(interaction) {
-        const choice = interaction.options.getString('sort');
+        const choice = interaction.options.getString('filter');
         if (!choice || choice === "xp") {
             //show leaderboard of all members based on xp
             const allMembers = await User.find({ guild_id: interaction.guildId });
@@ -91,17 +142,40 @@ module.exports = {
             allMembers.sort((a, b) => {
                 return b.unit.xp - a.unit.xp;
             });
-            //Create embed
+            //create embed
             const embedMessage = createEmbed(allMembers, "xp");
             await interaction.reply({ embeds: embedMessage });
         }
         else if (choice === "collectible") {
+            const collectibleMembers = await User.find({ guild_id: interaction.guildId });
+            if (collectibleMembers.length === 0) {
+                await interaction.reply({ content: `No user found in that server!` });
+                return;
+            }
+            if (collectibleMembers.length > 1) {
+                collectibleMembers.sort((a, b) => {
+                    let aCollectibles = 0;
+                    let bCollectibles = 0;
+                    for (let item in a.inventory) {
+                        if (item.item_type === "collectible") {
+                            aCollectibles++;
+                        }
+                    }
+                    for (let item in b.inventory) {
+                        if (item.item_type === "collectible") {
+                            bCollectibles++;
+                        }
+                    }
+                    return bCollectibles - aCollectibles;
+                });
+            }
             //show leaderboard of all members based on amounts of collectibles
+            const embedMessage = await createEmbed(collectibleMembers, "collectible");
+            await interaction.reply({ embeds: embedMessage });
         }
         else {
             //show leaderboard of chosen origin based on xp
             const originMembers = await User.find({ guild_id: interaction.guildId, "unit.unit_type": choice });
-            console.log(`choice: ${choice}`)
             if (originMembers.length === 0) {
                 await interaction.reply({ content: `No ${choice}s found!` });
                 return;
@@ -113,7 +187,7 @@ module.exports = {
                 });
             }
             //Create embed
-            const embedMessage = createEmbed(originMembers, "origin");
+            const embedMessage = await createEmbed(originMembers, "origin");
             await interaction.reply({ embeds: embedMessage });
         }
 
