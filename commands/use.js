@@ -30,7 +30,7 @@ module.exports = {
             await interaction.reply({ content: `You don't have this item!` });
             return;
         }
-        switch (usedItem.type) {
+        switch (usedItem.item_type) {
 
             case "revive":
                 //reviving item
