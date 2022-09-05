@@ -1,5 +1,6 @@
 const User = require('./../User.js');
 const Guild = require('./../schemas/Guild.js');
+const Item = require('./../schemas/Item.js');
 const { trainingReward } = require('./../commands/training.js');
 const { levelUp } = require('./unitLevel.js');
 
@@ -9,9 +10,11 @@ const healPercentage = 0.1 //percentage of maxHealth healed
 const healableStatus = ["idle", "atTraining"];
 const statusWithEndTime = ["atQuest", "atEvent", "atTraining", "unconscious"];
 let lastHour = new Date().getHours();
+let lastShopRotation = new Date;
+lastShopRotation.setDate(lastShopRotation.getDate() - (lastShopRotation.getDay() - 1));
+lastShopRotation.setHours(0, 0, 0, 0);
 
-
-const checkForUpdates = async (client) => {
+async function healUser() {
     let newHour = new Date().getHours();
     if (newHour != lastHour) {
         //heal users every hour
@@ -28,6 +31,8 @@ const checkForUpdates = async (client) => {
         }
         lastHour = newHour;
     }
+}
+async function statusTime() {
     //get all user with the wanted status and status time ended every x seconds
     const results = await User.find({ status: { $in: statusWithEndTime }, status_time: { $lte: Date.now() } });
     for (let x in results) {
@@ -106,6 +111,42 @@ const checkForUpdates = async (client) => {
             await user.save();
         }
     }
+}
+async function collectibleShopRotation() {
+    let currentDate = new Date();
+    const oneWeekInMs = 604800000;
+    if (new Date(lastShopRotation.getTime() + oneWeekInMs) > currentDate) {
+        return;
+    }
+    //change shop rotation
+    lastShopRotation = currentDate;
+    //add a new collectible to shop
+    const newBuyableCollectables = await Item.find({ buyable: false, item_type: "collectible", effect: { $lte: 2 } })
+    if (newBuyableCollectables.length === 0) {
+        console.log(`no collectibles found for shop rotation!`);
+        return;
+    }
+    const randomSelector = Math.floor(Math.random() * (newBuyableCollectables.length + 1));
+    newBuyableCollectables[randomSelector].buyable = true;
+    //delete previous collectibles from shop
+    const prevBuyableCollectables = await Item.find({ item_type: "collectible", buyable: true });
+    if (prevBuyableCollectables.length > 0) {
+        for (let item of prevBuyableCollectables) {
+            item.buyable = false;
+            await item.save();
+        }
+    }
+    await newBuyableCollectables[randomSelector].save();
+    return;
+}
+
+
+
+
+const checkForUpdates = async (client) => {
+    await healUser();
+    await statusTime();
+    await collectibleShopRotation();
     setTimeout(() => checkForUpdates(client), 1000);
 }
 module.exports = { checkForUpdates };
