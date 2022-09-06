@@ -127,7 +127,7 @@ module.exports = {
                 { name: 'Guard Naki', value: 'guardNaki' },
                 { name: 'Forest Spirit', value: 'forestSpirit' },
                 { name: 'Elder Spirit', value: 'elderSpirit' },
-                { name: 'collectible', value: 'collectible' }
+                { name: 'Collectibles', value: 'collectible' }
             )),
     async execute(interaction) {
         const choice = interaction.options.getString('filter');

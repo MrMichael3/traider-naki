@@ -18,7 +18,7 @@ module.exports = {
         .setDescription('Show your items and soulstones'),
     async execute(interaction) {
         const user = await User.findOne({ discord_id: interaction.user.id, guild_id: interaction.guildId });
-        const collectibles = await Item.find({ type: "collectible" }).exec();
+        const collectibles = await Item.find({ item_type: "collectible" }).exec();
         var amountOfCollectibles = 0;
         var userCollectibles = 0;
         var consumableItems = "";
@@ -30,7 +30,7 @@ module.exports = {
         try {
             for (const item of user.inventory) {
                 //create a string of all collectibles the user has
-                if (item.type === "collectible") {
+                if (item.item_type === "collectible") {
                     let rarity = "";
                     if (item.effect === 1) {
                         rarity = "uncommon";
