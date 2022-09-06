@@ -24,9 +24,6 @@ for (const file of commandFiles) {
 
 //command handler: create a file for new commands and run 'deploy-commands.js' 
 client.on('interactionCreate', async interaction => {
-
-	const emojiList = client.emojis.cache.map(emoji => emoji.toString()).join(" ");
-	console.log(emojiList);
 	if (!interaction.isCommand()) return;
 	const command = client.commands.get(interaction.commandName);
 	if (!command) return;

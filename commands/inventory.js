@@ -31,20 +31,27 @@ module.exports = {
             for (const item of user.inventory) {
                 //create a string of all collectibles the user has
                 if (item.item_type === "collectible") {
+                    const itemInfo = await Item.findOne({ name: item.item_name }).exec();
+                    if (!itemInfo) {
+                        console.log(`Invalid items in inventory`);
+                        //TODO: remove invalid items and redo command
+                        await interaction.reply({ content: `Inventory corrupted, ask Ramsus for help!` });
+                        return;
+                    }
                     let rarity = "";
-                    if (item.effect === 1) {
-                        rarity = "uncommon";
+                    if (itemInfo.effect === 1) {
+                        rarity = emojis.uncommon;
                     }
-                    else if (item.effect === 2) {
-                        rarity = "rare";
+                    else if (itemInfo.effect === 2) {
+                        rarity = emojis.rare;
                     }
-                    else if (item.effect === 3) {
-                        rarity = "epic";
+                    else if (itemInfo.effect === 3) {
+                        rarity = emojis.epic;
                     }
-                    else if (item.effect === 4) {
-                        rarity = "legendary";
+                    else if (itemInfo.effect === 4) {
+                        rarity = emojis.legendary;
                     }
-                    let itemString = `**${item.item_name} (${rarity})**\n`;
+                    let itemString = `**${item.item_name}** (${rarity})\n`;
                     staticItems = staticItems + itemString;
                     userCollectibles += 1;
                 }
