@@ -1041,7 +1041,6 @@ module.exports = {
                 break;
             default:
                 //quest not available
-                console.log(`default option at /quest with status ${user.status}`);
                 await interaction.reply({ content: `You are ${user.status} and can't do a quest at the moment. Come back when you are idle.` });
                 return;
         }
