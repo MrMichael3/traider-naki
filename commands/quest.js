@@ -787,7 +787,6 @@ module.exports = {
         //messageCollector
         const filter = (int) => {
             if (int.user.id === interaction.user.id) {
-                console.log(`custom id: ${int.customId}`)
                 return true;
             }
             return int.reply({ content: `You can't use this button!`, ephemeral: true });
