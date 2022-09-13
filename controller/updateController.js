@@ -117,7 +117,7 @@ async function statusTime(client) {
 async function collectibleShopRotation() {
     let currentDate = new Date();
     const oneWeekInMs = 604800000;
-    const riseInTimeGuild = await Guild.findOne({ id: "526531050604593150" }).exec();
+    const riseInTimeGuild = await Guild.findOne({ id: "324527754257367040" }).exec();
     if (!riseInTimeGuild) {
         console.log(`guild does not exist`)
         return;
