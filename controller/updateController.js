@@ -139,7 +139,7 @@ async function collectibleShopRotation() {
             return;
         }
     }
-    if (new Date(lastShopRotation.getTime() + oneWeekInMs) > currentDate) {
+    if (lastShopRotation.getTime() + oneWeekInMs > currentDate.getTime()) {
         return;
     }
     console.log(`change shop rotation`)
