@@ -51,7 +51,7 @@ module.exports = {
                     else if (itemInfo.effect === 4) {
                         rarity = emojis.legendary;
                     }
-                    let itemString = `**${item.item_name}** (${rarity})\n`;
+                    let itemString = `**${item.item_name}** ${rarity}\n`;
                     staticItems = staticItems + itemString;
                     userCollectibles += 1;
                 }
