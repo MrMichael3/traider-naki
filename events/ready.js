@@ -14,8 +14,13 @@ module.exports = {
             await client.guilds.cache.forEach(async g => {
                 const guild = await Guild.findOne({ id: g.id }).exec();
                 if (guild && guild.allowsRoles) {
-                    if (!g.roles.cache.find(role => role.name === "Expelsia")) {
-                        g.roles.create({ name: 'Expelsia', color: '#43572c', mentionable: true, reason: 'members of Expelsia -Traider Naki bot' });
+                    try {
+                        if (!g.roles.cache.find(role => role.name === "Expelsia")) {
+                            g.roles.create({ name: 'Expelsia', color: '#43572c', mentionable: true, reason: 'members of Expelsia -Traider Naki bot' });
+                        }
+                    }
+                    catch {
+                        console.log(`no permission to create role in guild ${guild.name}`);
                     }
                 }
             });
