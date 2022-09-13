@@ -118,6 +118,10 @@ async function collectibleShopRotation() {
     let currentDate = new Date();
     const oneWeekInMs = 604800000;
     const riseInTimeGuild = await Guild.findOne({ id: "526531050604593150" }).exec();
+    if (!riseInTimeGuild) {
+        console.log(`guild does not exist`)
+        return;
+    }
     try {
         var lastShopRotation = riseInTimeGuild.shopRotation;
         //lastShopRotation.setDate(lastShopRotation.getDate() - (lastShopRotation.getDay() - 1));
@@ -128,8 +132,14 @@ async function collectibleShopRotation() {
         return;
     }
     if (!lastShopRotation) {
-        console.log(`last shop rotation not defined in database`);
-        return;
+        try {
+            console.log(`last shop rotation not defined in ${riseInTimeGuild.name}`);
+            return;
+        }
+        catch (err) {
+            console.error(err);
+            return;
+        }
     }
     if (new Date(lastShopRotation.getTime() + oneWeekInMs) > currentDate) {
         return;
