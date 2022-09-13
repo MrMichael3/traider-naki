@@ -123,7 +123,7 @@ async function collectibleShopRotation() {
         return;
     }
     try {
-        var lastShopRotation = riseInTimeGuild.shopRotation;
+        var lastShopRotation = new Date(riseInTimeGuild.shopRotation);
         console.log(`guild: ${JSON.stringify(riseInTimeGuild)}`)
         //lastShopRotation.setDate(lastShopRotation.getDate() - (lastShopRotation.getDay() - 1));
         //lastShopRotation.setHours(0, 0, 0, 0);
