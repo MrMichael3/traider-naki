@@ -10,9 +10,11 @@ const healPercentage = 0.1 //percentage of maxHealth healed
 const healableStatus = ["idle", "atTraining"];
 const statusWithEndTime = ["atQuest", "atEvent", "atTraining", "unconscious"];
 let lastHour = new Date().getHours();
+/*
 let lastShopRotation = new Date;
 lastShopRotation.setDate(lastShopRotation.getDate() - (lastShopRotation.getDay() - 1));
 lastShopRotation.setHours(0, 0, 0, 0);
+*/
 
 async function healUser() {
     let newHour = new Date().getHours();
@@ -32,7 +34,7 @@ async function healUser() {
         lastHour = newHour;
     }
 }
-async function statusTime() {
+async function statusTime(client) {
     //get all user with the wanted status and status time ended every x seconds
     const results = await User.find({ status: { $in: statusWithEndTime }, status_time: { $lte: Date.now() } });
     for (let x in results) {
@@ -115,6 +117,20 @@ async function statusTime() {
 async function collectibleShopRotation() {
     let currentDate = new Date();
     const oneWeekInMs = 604800000;
+    const riseInTimeGuild = await Guild.findOne({ id: "526531050604593150" }).exec();
+    try {
+        var lastShopRotation = riseInTimeGuild.shopRotation;
+        //lastShopRotation.setDate(lastShopRotation.getDate() - (lastShopRotation.getDay() - 1));
+        //lastShopRotation.setHours(0, 0, 0, 0);
+    }
+    catch (err) {
+        console.error(err);
+        return;
+    }
+    if (!lastShopRotation) {
+        console.log(`last shop rotation not defined in database`);
+        return;
+    }
     if (new Date(lastShopRotation.getTime() + oneWeekInMs) > currentDate) {
         return;
     }
@@ -137,6 +153,8 @@ async function collectibleShopRotation() {
         }
     }
     await newBuyableCollectables[randomSelector].save();
+    riseInTimeGuild.shopRotation = lastShopRotation;
+    await riseInTimeGuild.save();
     return;
 }
 
@@ -145,7 +163,7 @@ async function collectibleShopRotation() {
 
 const checkForUpdates = async (client) => {
     await healUser();
-    await statusTime();
+    await statusTime(client);
     await collectibleShopRotation();
     setTimeout(() => checkForUpdates(client), 1000);
 }
