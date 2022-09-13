@@ -151,8 +151,9 @@ async function collectibleShopRotation() {
         console.log(`no collectibles found for shop rotation!`);
         return;
     }
-    const randomSelector = Math.floor(Math.random() * (newBuyableCollectables.length + 1));
-    console.log(`selector: ${randomSelector}, item: ${newBuyableCollectables[randomSelector].name}`)
+    const randomSelector = Math.floor(Math.random() * (newBuyableCollectables.length));
+    console.log(`selector: ${randomSelector} of ${newBuyableCollectables.length}`);
+    console.log(`item: ${newBuyableCollectables[randomSelector].name}`)
     newBuyableCollectables[randomSelector].buyable = true;
     //delete previous collectibles from shop
     const prevBuyableCollectables = await Item.find({ item_type: "collectible", buyable: true });
