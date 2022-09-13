@@ -16,6 +16,9 @@ const GuildSchema = new mongoose.Schema({
     allowsRoles: {
         type: Boolean,
         default: true
+    },
+    shopRotation: {
+        type: Date,
     }
 });
 module.exports = mongoose.model("Guild", GuildSchema);

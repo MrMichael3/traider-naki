@@ -139,6 +139,7 @@ async function collectibleShopRotation() {
             return;
         }
     }
+    console.log(`last roation + a week > current day:\n${lastShopRotation.getTime() + oneWeekInMs}\n${currentDate.getTime()}`)
     if (lastShopRotation.getTime() + oneWeekInMs > currentDate.getTime()) {
         return;
     }
