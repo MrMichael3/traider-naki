@@ -124,9 +124,6 @@ async function collectibleShopRotation() {
     }
     try {
         var lastShopRotation = new Date(riseInTimeGuild.shopRotation);
-        console.log(`guild: ${JSON.stringify(riseInTimeGuild)}`)
-        //lastShopRotation.setDate(lastShopRotation.getDate() - (lastShopRotation.getDay() - 1));
-        //lastShopRotation.setHours(0, 0, 0, 0);
     }
     catch (err) {
         console.error(err);
@@ -145,6 +142,7 @@ async function collectibleShopRotation() {
     if (new Date(lastShopRotation.getTime() + oneWeekInMs) > currentDate) {
         return;
     }
+    console.log(`change shop rotation`)
     //change shop rotation
     lastShopRotation = currentDate;
     //add a new collectible to shop
@@ -154,6 +152,7 @@ async function collectibleShopRotation() {
         return;
     }
     const randomSelector = Math.floor(Math.random() * (newBuyableCollectables.length + 1));
+    console.log(`selector: ${randomSelector}, item: ${newBuyableCollectables[randomSelector].name}`)
     newBuyableCollectables[randomSelector].buyable = true;
     //delete previous collectibles from shop
     const prevBuyableCollectables = await Item.find({ item_type: "collectible", buyable: true });
