@@ -64,10 +64,24 @@ module.exports = {
                     guild.allowsRoles = true;
                     //create role
                     if (!interaction.guild.roles.cache.find(role => role.name === "Expelsia")) {
-                        interaction.guild.roles.create({ name: 'Expelsia', color: '#43572c', mentionable: true, reason: 'members of Expelsia -Traider Naki bot' });
+                        try {
+                            interaction.guild.roles.create({ name: 'Expelsia', color: '#43572c', mentionable: true, reason: 'members of Expelsia -Traider Naki bot' });
+                            t = `The bot will give users who join Expelsia the Expelsia role.`
+
+                        }
+                        catch {
+                            try {
+                                await i.update({ content: `missing permissions to create new roles`, components: [] });
+                                return;
+                            }
+                            catch (err) {
+                                console.error(err);
+                                return;
+                            }
+                        }
                     }
-                    t = `The bot will give users who join Expelsia the Expelsia role.`
                 }
+
                 await guild.save();
                 try {
                     await i.update({ content: t, components: [] });
