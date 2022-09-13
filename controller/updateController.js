@@ -139,11 +139,9 @@ async function collectibleShopRotation() {
             return;
         }
     }
-    console.log(`last roation + a week > current day:\n${lastShopRotation.getTime() + oneWeekInMs}\n${currentDate.getTime()}`)
     if (lastShopRotation.getTime() + oneWeekInMs > currentDate.getTime()) {
         return;
     }
-    console.log(`change shop rotation`)
     //change shop rotation
     lastShopRotation = currentDate;
     //add a new collectible to shop
@@ -153,8 +151,6 @@ async function collectibleShopRotation() {
         return;
     }
     const randomSelector = Math.floor(Math.random() * (newBuyableCollectables.length));
-    console.log(`selector: ${randomSelector} of ${newBuyableCollectables.length}`);
-    console.log(`item: ${newBuyableCollectables[randomSelector].name}`)
     newBuyableCollectables[randomSelector].buyable = true;
     //delete previous collectibles from shop
     const prevBuyableCollectables = await Item.find({ item_type: "collectible", buyable: true });
