@@ -179,10 +179,15 @@ module.exports = {
                     }
                     const addedNewUser = await handleNewUser(newUser);
                     if (!addedNewUser) { return console.log(`User ${newUser.id} couldn't be added!`); }
-                    //give the role Expelsia to the user
-                    const expelsiaRole = interaction.guild.roles.cache.find(role => role.name === "Expelsia");
-                    if (expelsiaRole) {
-                        interaction.guild.members.cache.get(interaction.user.id).roles.add(expelsiaRole);
+                    try {
+                        //give the role Expelsia to the user
+                        const expelsiaRole = interaction.guild.roles.cache.find(role => role.name === "Expelsia");
+                        if (expelsiaRole) {
+                            interaction.guild.members.cache.get(interaction.user.id).roles.add(expelsiaRole);
+                        }
+                    }
+                    catch (err) {
+                        console.error(err);
                     }
                     collector.stop();
                 }
