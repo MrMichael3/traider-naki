@@ -7,6 +7,7 @@ const unitData = require('./../unitStats.json');
 const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
 const emojis = require('./../emojis.json');
 const { getUnitLevel, statsMultiplier, levelUp } = require('./../controller/unitLevel.js');
+const { isEffective } = require('../controller/fightController.js');
 
 
 const statsMultiplierPercentage = (statsMultiplier + 100) / 100;
@@ -18,6 +19,7 @@ const legendaryCollectibleChance = 0.2;
 const itemChance = 0.4;
 const soulstoneMultiplier = 500; // multiplier * duration/maxDuration * difficulty = base soulstone reward
 const xpMultiplier = 10; // multiplier^level = base xp reward
+const effectiveMultiplier = 1.5;
 
 
 function readableTime(ms) {
@@ -57,6 +59,12 @@ function readableTime(ms) {
     }
     return time;
 
+}
+
+function beautifyUnitName(unitType) {
+    unitType = unitType.replace(/[A-Z]/g, ' $&').trim();
+    unitType = unitType.charAt(0).toUpperCase() + unitType.slice(1);
+    return unitType;
 }
 
 async function createQuests(user) {
@@ -419,17 +427,22 @@ async function fightSimulator(user, enemy) {
         result = { success: true, currentHealth: user.unit.current_health };
         return result;
     }
+    const playerName = beautifyUnitName(user.unit.unit_type);
+    const playerEffective = isEffective(playerName, baseEnemy.name);
+    const enemyEffective = isEffective(baseEnemy.name, playerName);
 
-    let userHealth = user.unit.current_health;
+    let playerHealth = user.unit.current_health;
     let enemyHealth = Math.round(baseEnemy.health * Math.pow(statsMultiplierPercentage, enemy.level - 1));
     let enemyAttack = [Math.round(baseEnemy.minAttack * Math.pow(statsMultiplierPercentage, enemy.level - 1) * 100) / 100, Math.round(baseEnemy.maxAttack * Math.pow(statsMultiplierPercentage, enemy.level - 1) * 100) / 100];
     let playerAttacks = Math.round(Math.random()); //boolean if player attacks first
+
     result.enemy = {};
     result.enemy.maxHealth = enemyHealth;
     result.enemy.minAttack = enemyAttack[0];
     result.enemy.maxAttack = enemyAttack[1];
     let c = 0;
     let fightOnGoing = true;
+
     while (fightOnGoing) {
         c++;
         //fight until one unit dies
@@ -438,27 +451,31 @@ async function fightSimulator(user, enemy) {
             //player attacks
             playerAttacks = 0;
             attack = Math.floor((Math.random() * (user.unit.max_attack - user.unit.min_attack) + user.unit.min_attack) * 100) / 100;
-            //TODO: Increase attack if effective
+            if (playerEffective) {
+                //increase attack
+                attack = Math.floor(attack * effectiveMultiplier * 100) / 100;
+            }
             enemyHealth = Math.max(enemyHealth - attack, 0);
             if (enemyHealth === 0) {
                 //player wins the fight
                 result.success = true;
-                result.currentHealth = userHealth;
+                result.currentHealth = playerHealth;
                 result.enemy.currentHealth = enemyHealth;
                 fightOnGoing = false;
-                //TODO: WIN
             }
         }
         else {
             //enemy attacks
             playerAttacks = 1;
             attack = Math.floor((Math.random() * (enemyAttack[1] - enemyAttack[0]) + enemyAttack[0]) * 100) / 100;
-            //TODO: Increase attack if effective
-            userHealth = Math.max(userHealth - attack, 0);
-            if (userHealth === 0) {
+            if (enemyEffective) {
+                attack = Math.floor(attack * effectiveMultiplier * 100) / 100;
+            }
+            playerHealth = Math.max(playerHealth - attack, 0);
+            if (playerHealth === 0) {
                 //enemy wins the fight
                 result.success = false;
-                result.currentHealth = userHealth;
+                result.currentHealth = playerHealth;
                 result.enemy.currentHealth = enemyHealth;
                 fightOnGoing = false;
             }
