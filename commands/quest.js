@@ -814,8 +814,9 @@ module.exports = {
             return int.reply({ content: `You can't use this button!`, ephemeral: true });
         };
         const selectionFilter = (int) => {
+            console.log(`quest filter: ${int.customId}`);
             if (int.user.id === interaction.user.id) {
-                const x = Number(i.customId);
+                const x = Number(int.customId);
                 if (Number.isInteger(x) && x < 3 && x >= 0) {
                     return true;
                 }
@@ -866,6 +867,7 @@ module.exports = {
                     max: 1
                 });
                 questSelectionCollector.on('collect', async i => {
+                    const chosenQuest = Number(i.customId);
                     try {
                         if (Number.isInteger(chosenQuest)) {
                             questSelectionCollector.stop();
