@@ -802,9 +802,27 @@ module.exports = {
             return;
         }
         //messageCollector
-        const filter = (int) => {
+        const reportFilter = (int) => {
             if (int.user.id === interaction.user.id) {
-                return true;
+                if (int.customId === "next") {
+                    return true;
+                }
+                else {
+                    return;
+                }
+            }
+            return int.reply({ content: `You can't use this button!`, ephemeral: true });
+        };
+        const selectionFilter = (int) => {
+            console.log(`quest filter: ${int.customId}`);
+            if (int.user.id === interaction.user.id) {
+                const x = Number(int.customId);
+                if (Number.isInteger(x) && x < 3 && x >= 0) {
+                    return true;
+                }
+                else {
+                    return;
+                }
             }
             return int.reply({ content: `You can't use this button!`, ephemeral: true });
         };
@@ -843,22 +861,13 @@ module.exports = {
                 const embed = await createSelectionEmbed(user);
                 await interaction.editReply({ embeds: embed, components: [row] });
 
-
                 const questSelectionCollector = interaction.channel.createMessageComponentCollector({
-                    filter,
+                    filter: selectionFilter,
                     time: 120000,
                     max: 1
                 });
                 questSelectionCollector.on('collect', async i => {
-                    try {
-                        var chosenQuest = Number(i.customId);
-                        if (!Number.isInteger(chosenQuest) || chosenQuest > 2 || chosenQuest < 0) {
-                            return;
-                        }
-                    }
-                    catch {
-                        return;
-                    }
+                    const chosenQuest = Number(i.customId);
                     try {
                         if (Number.isInteger(chosenQuest)) {
                             questSelectionCollector.stop();
@@ -868,8 +877,9 @@ module.exports = {
                             user.status = "atQuest";
                             user.status_time = Date.now() + user.quest[0].duration * 1000;
                             //reply
-                            await user.save();
                             await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
+                            await interaction.editReply({ components: [] });
+                            await user.save();
                         }
                     }
                     catch (err) {
@@ -1043,11 +1053,11 @@ module.exports = {
                     );
 
                 await interaction.reply({ embeds: embedReport[stageCounter - 1], components: [reportRow] });
-                const reportCollector = interaction.channel.createMessageComponentCollector({ filter, time: 120000 });
+                const reportCollector = interaction.channel.createMessageComponentCollector({
+                    filter: reportFilter,
+                    time: 120000
+                });
                 reportCollector.on('collect', async i => {
-                    if (i.customId != "next") {
-                        return;
-                    }
                     stageCounter++;
                     try {
                         i.deferUpdate();
