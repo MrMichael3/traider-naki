@@ -22,12 +22,12 @@ module.exports = {
         const row = new MessageActionRow()
             .addComponents(
                 new MessageButton()
-                    .setCustomId('yes')
+                    .setCustomId('delete')
                     .setLabel('YES')
                     .setStyle('DANGER'),
 
                 new MessageButton()
-                    .setCustomId('no')
+                    .setCustomId('stay')
                     .setLabel('NO')
                     .setStyle('SECONDARY')
             );
@@ -38,7 +38,12 @@ module.exports = {
         //collector for button interaction
         const filter = (int) => {
             if (int.user.id === interaction.user.id) {
-                return true;
+                if (int.customId === "delete" || int.customId === "stay") {
+                    return true;
+                }
+                else{
+                    return;
+                }
             }
             return int.reply({ content: `You can't use this button!` });
         };
@@ -49,11 +54,11 @@ module.exports = {
         collector.on('collect', async i => {
             try {
                 const answer = i.customId;
-                if (answer === "no") {
+                if (answer === "stay") {
                     await i.reply({ content: `**User deleted!**\n\nJust kidding, you decided to stay in Expelsia and to continue your journey.` });
                     return;
                 }
-                else {
+                else if(answer === "delete") {
                     //delete db entry
                     await User.deleteOne({ discord_id: interaction.user.id, guild_id: interaction.guildId }).exec();
                     await i.reply({ content: `Your account gets **deleted**. Thanks for playing Expelsia RPG.\nIf you want to restart, **type '/start'**.` });

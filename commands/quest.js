@@ -844,14 +844,24 @@ module.exports = {
                 await interaction.editReply({ embeds: embed, components: [row] });
 
 
-                const collector = interaction.channel.createMessageComponentCollector({
+                const questSelectionCollector = interaction.channel.createMessageComponentCollector({
                     filter,
-                    time: 120000
+                    time: 120000,
+                    max: 1
                 });
-                collector.on('collect', async i => {
+                questSelectionCollector.on('collect', async i => {
                     try {
-                        const chosenQuest = Number(i.customId);
+                        var chosenQuest = Number(i.customId);
+                        if (!Number.isInteger(chosenQuest) || chosenQuest > 2 || chosenQuest < 0) {
+                            return;
+                        }
+                    }
+                    catch {
+                        return;
+                    }
+                    try {
                         if (Number.isInteger(chosenQuest)) {
+                            questSelectionCollector.stop();
                             //delete the other quests
                             user.quest = [user.quest[chosenQuest]];
                             //set status and status time
@@ -1046,8 +1056,8 @@ module.exports = {
                         }
                         else {
                             //show report summary
-                            await interaction.editReply({ embeds: summaryEmbed, components: [] });
                             reportCollector.stop();
+                            await interaction.editReply({ embeds: summaryEmbed, components: [] });
                         }
                     }
                     catch (err) {
@@ -1058,8 +1068,13 @@ module.exports = {
                 break;
             default:
                 //quest not available
-                await interaction.reply({ content: `You are ${user.status} and can't do a quest at the moment. Come back when you are idle.` });
-                return;
+                try {
+                    await interaction.reply({ content: `You are ${user.status} and can't do a quest at the moment. Come back when you are idle.` });
+                    return;
+                }
+                catch (err) {
+                    console.error(err);
+                }
         }
     }, readableTime
 };

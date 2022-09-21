@@ -148,16 +148,22 @@ module.exports = {
 
             //collector for button interaction
             const filter = (int) => {
+                const filterUnits = ["druidNaki", "guardNaki", "forestSpirit", "elderSpirit"];
                 if (int.user.id === interaction.user.id) {
-                    return true;
+                    if (filterUnits.includes(int.customId)) {
+                        return true;
+                    }
+                    else {
+                        return;
+                    }
                 }
                 return int.reply({ content: `You can't use this button!`, ephemeral: true });
             };
-            const collector = interaction.channel.createMessageComponentCollector({
+            const unitSelectionCollector = interaction.channel.createMessageComponentCollector({
                 filter,
                 time: 120000
             });
-            collector.on('collect', async i => {
+            unitSelectionCollector.on('collect', async i => {
                 const chosenUnitId = i.customId;
                 let chosenUnitName = chosenUnitId.replace(/([A-Z])/g, ' $1');
                 chosenUnitName = chosenUnitName.charAt(0).toUpperCase() + chosenUnitName.slice(1);
@@ -189,7 +195,7 @@ module.exports = {
                     catch (err) {
                         console.error(err);
                     }
-                    collector.stop();
+                    unitSelectionCollector.stop();
                 }
             });
         }

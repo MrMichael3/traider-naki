@@ -133,15 +133,20 @@ module.exports = {
             //collector for button interaction
             const filter = (int) => {
                 if (int.user.id === interaction.user.id) {
-                    return true;
+                    if (int.customId === backId || int.customId === forwardId) {
+                        return true;
+                    }
+                    else{
+                        return;
+                    }
                 }
                 return int.reply({ content: `You can't use this button!`, ephemeral: true });
             };
-            const collector = interaction.channel.createMessageComponentCollector({
+            const shopPageCollector = interaction.channel.createMessageComponentCollector({
                 filter
             });
             let currentIndex = 0;
-            collector.on('collect', async i => {
+            shopPageCollector.on('collect', async i => {
                 // Increase/decrease index
                 if (i.customId === backId) {
                     currentIndex -= itemsPerShopPage;
@@ -166,7 +171,7 @@ module.exports = {
                     });
                 }
                 catch {
-                    collector.stop();
+                    shopPageCollector.stop();
                 }
             });
         }
