@@ -1,5 +1,5 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageActionRow, MessageButton, ButtonInteraction, ComponentType } = require('discord.js');
+const { MessageActionRow, MessageButton } = require('discord.js');
 const User = require('./../User.js');
 const mongoose = require('mongoose');
 const { getUnitLevel, levelUp } = require('./../controller/unitLevel.js');
@@ -75,40 +75,53 @@ module.exports = {
             remainTime = Math.floor((remainTime - Date.now()) / 1000);
             if (remainTime < 120) {
                 //can't end training at last two minutes
-                interaction.reply({ content: `Your training ends in **${remainingTime(remainTime)}**` });
+                try {
+                    interaction.reply({ content: `Your training ends in **${remainingTime(remainTime)}**` });
+                }
+                catch (err) {
+                    console.error(err);
+                }
                 return;
             }
             const row = new MessageActionRow()
                 .addComponents(
                     new MessageButton()
-                        .setCustomId('yes')
+                        .setCustomId('endTraining')
                         .setLabel('YES')
                         .setStyle('DANGER'),
 
                     new MessageButton()
-                        .setCustomId('no')
+                        .setCustomId('keepTraining')
                         .setLabel('NO')
                         .setStyle('SECONDARY')
                 );
-            await interaction.reply({
-                content: `Your training ends in **${remainingTime(remainTime)}**. Do you want to end training early? \n **Caution:** You get less experience by ending training early!`,
-                components: [row]
-            });
+            try {
+                await interaction.reply({
+                    content: `Your training ends in **${remainingTime(remainTime)}**. Do you want to end training early? \n **Caution:** You get less experience by ending training early!`,
+                    components: [row]
+                });
+            }
+            catch (err) {
+                console.error(err);
+            }
             //collector for button interaction
             const filter = (int) => {
-                //int.deferUpdate();
                 if (int)
                     if (int.user.id === interaction.user.id) {
-                        return true;
+                        if (int.customId === "endTraining" || int.customId === "keepTraining") {
+                            return true;
+                        }
+                        else {
+                            return;
+                        }
                     }
                 return int.reply({ content: `You can't use this button!` });
             };
-            const collector = interaction.channel.createMessageComponentCollector({
+            const trainingCollector = interaction.channel.createMessageComponentCollector({
                 filter,
-                time: 10000,
-                max: 1
+                time: 10000
             });
-            const correctionCollector = interaction.channel.createMessageCollector({
+            /*const correctionCollector = interaction.channel.createMessageCollector({
                 time: 10000
             });
             correctionCollector.on('collect', i => {
@@ -116,31 +129,44 @@ module.exports = {
                     collector.stop();
                 }
             })
-
-            collector.on('end', async (ButtonInteraction) => {
+*/
+            trainingCollector.on('collect', async i => {
+                const buttonId = i.customId;
                 try {
-                    ButtonInteraction.first().deferUpdate();
-                    const buttonId = ButtonInteraction.first().customId;
-                    if (buttonId === "yes") {
-                        //end training
-                        const xpBeforeReward = user.unit.xp;
-                        const rewardedXp = await trainingReward(user, true);
-                        await interaction.followUp({ content: `you have finished your training and got ${rewardedXp} XP.` });
+                    await interaction.editReply({ components: [] });
+                    await i.deferUpdate();
+                }
+                catch {
+                    return;
+                }
+                if (user.status != "atTraining") {
+                    console.log(`user not at training!!`);
+                    return;
+                }
+                if (buttonId === "endTraining") {
+                    //end training
+                    const xpBeforeReward = user.unit.xp;
+                    const rewardedXp = await trainingReward(user, true);
+                    try {
+                        await i.editReply({ content: `you have finished your training and got ${rewardedXp} XP.` });
                         //check for levelUp
                         levelUp(user, xpBeforeReward, interaction.channel);
                     }
-                    if (buttonId === "no") {
-                        //continue training
-                        await interaction.followUp({ content: `Continue training` });
+                    catch (err) {
+                        console.error(err);
+                        return;
                     }
                 }
-                catch {
-                    collector.stop();
-                    console.log("error with training command handler!");
+                else {
+                    //continue training
+                    try {
+                        await i.editReply({ content: `Continue training` });
+                    }
+                    catch {
+                        return;
+                    }
                 }
             });
-
-
         }
         else if (status != "idle") {
             return await interaction.reply({ content: `You can't start a training, you are currently ${status}` });
@@ -149,8 +175,13 @@ module.exports = {
             //start training
             user.status = "atTraining";
             user.status_time = Date.now() + trainingDuration;
-            await user.save();
-            await interaction.reply({ content: `**You have started your ${trainingDuration / (1000 * 3600)} hours training**. \n At the end of the training, you automatically gain experience. If you end the training early by repeating this command, you will get **less experience**. You can't do any quests or other activities while training!` });
+            try {
+                await user.save();
+                await interaction.reply({ content: `**You have started your ${trainingDuration / (1000 * 3600)} hours training**. \n At the end of the training, you automatically gain experience. If you end the training early by repeating this command, you will get **less experience**. You can't do any quests or other activities while training!` });
+            }
+            catch (err) {
+                console.error(err);
+            }
         }
     },
     trainingReward

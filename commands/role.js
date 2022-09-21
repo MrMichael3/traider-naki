@@ -29,12 +29,12 @@ module.exports = {
         const row = new MessageActionRow()
             .addComponents(
                 new MessageButton()
-                    .setCustomId('yes')
+                    .setCustomId('changeSetting')
                     .setLabel('YES')
                     .setStyle('PRIMARY'),
 
                 new MessageButton()
-                    .setCustomId('no')
+                    .setCustomId('dontChangeSetting')
                     .setLabel('NO')
                     .setStyle('PRIMARY')
             );
@@ -42,17 +42,22 @@ module.exports = {
         //collector for button interaction
         const filter = (int) => {
             if (int.user.id === interaction.user.id) {
-                return true;
+                if (int.customId === "changeSetting" || int.customId === "dontChangeSetting") {
+                    return true;
+                }
+                else{
+                    return;
+                }
             }
             return int.reply({ content: `You can't use this button!`, ephemeral: true });
         };
-        const collector = interaction.channel.createMessageComponentCollector({
+        const roleCollector = interaction.channel.createMessageComponentCollector({
             filter,
             max: 1,
             time: 120000
         });
-        collector.on('collect', async i => {
-            if (i.customId === "yes") {
+        roleCollector.on('collect', async i => {
+            if (i.customId === "changeSetting") {
                 //change state
                 let t = "";
                 if (guild.allowsRoles) {
