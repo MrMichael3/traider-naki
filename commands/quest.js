@@ -814,7 +814,6 @@ module.exports = {
             return int.reply({ content: `You can't use this button!`, ephemeral: true });
         };
         const selectionFilter = (int) => {
-            console.log(`quest filter: ${int.customId}`);
             if (int.user.id === interaction.user.id) {
                 const x = Number(int.customId);
                 if (Number.isInteger(x) && x < 3 && x >= 0) {
@@ -1054,24 +1053,32 @@ module.exports = {
 
                 await interaction.reply({ embeds: embedReport[stageCounter - 1], components: [reportRow] });
                 const reportCollector = interaction.channel.createMessageComponentCollector({
-                    filter: reportFilter,
-                    time: 120000
+                    filter: reportFilter
                 });
                 reportCollector.on('collect', async i => {
                     stageCounter++;
                     try {
                         i.deferUpdate();
-                        if (stageCounter <= embedReport.length) {
-                            await interaction.editReply({ embeds: embedReport[stageCounter - 1], components: [reportRow] });
-                        }
-                        else {
-                            //show report summary
-                            reportCollector.stop();
-                            await interaction.editReply({ embeds: summaryEmbed, components: [] });
-                        }
                     }
                     catch (err) {
-                        console.error(err);
+                        console.error(`can't defer interaction at Report Collector\n${err}`);
+                    }
+                    if (stageCounter <= embedReport.length) {
+                        try {
+                            await interaction.editReply({ embeds: embedReport[stageCounter - 1], components: [reportRow] });
+                        }
+                        catch (err) {
+                            console.error(`Can't get to next quest report stage with stageCounter = ${stageCounter}\n${err}`);
+                        }
+                    }
+                    else {
+                        //show report summary
+                        try {
+                            await interaction.editReply({ embeds: summaryEmbed, components: [] });
+                        }
+                        catch (err) {
+                            console.error(`Can't show report summary\n${err}`);
+                        }
                     }
                 });
                 await levelUp(user, xpBefore, interaction.channel);
