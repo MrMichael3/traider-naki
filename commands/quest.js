@@ -455,7 +455,7 @@ async function fightSimulator(user, enemy) {
                 //increase attack
                 attack = Math.floor(attack * effectiveMultiplier * 100) / 100;
             }
-            enemyHealth = Math.max(enemyHealth - attack, 0);
+            enemyHealth = Math.round(Math.max(enemyHealth - attack, 0));
             if (enemyHealth === 0) {
                 //player wins the fight
                 result.success = true;
