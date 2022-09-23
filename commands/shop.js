@@ -136,7 +136,7 @@ module.exports = {
                     if (int.customId === backId || int.customId === forwardId) {
                         return true;
                     }
-                    else{
+                    else {
                         return;
                     }
                 }
@@ -157,7 +157,7 @@ module.exports = {
                 // Respond to interaction by updating message with new embed
                 try {
                     await i.update({
-                        embeds: await createEmbeds(currentIndex),
+                        embeds: await createEmbeds(Math.max(currentIndex - 1, 0)),
                         components: [
                             new MessageActionRow({
                                 components: [
