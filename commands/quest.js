@@ -882,7 +882,7 @@ module.exports = {
                             user.status = "atQuest";
                             user.status_time = Date.now() + user.quest[0].duration * 1000;
                             //reply
-                            await i.editReply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
+                            await i.followUp({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
                             await interaction.editReply({ components: [] });
                             await user.save();
                         }
