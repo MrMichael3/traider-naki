@@ -866,6 +866,12 @@ module.exports = {
                     max: 1
                 });
                 questSelectionCollector.on('collect', async i => {
+                    try{
+                        await i.deferUpdate();
+                    }
+                    catch (err){
+                        console.error(err);
+                    }
                     const chosenQuest = Number(i.customId);
                     try {
                         if (Number.isInteger(chosenQuest)) {
@@ -876,7 +882,7 @@ module.exports = {
                             user.status = "atQuest";
                             user.status_time = Date.now() + user.quest[0].duration * 1000;
                             //reply
-                            await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
+                            await i.editReply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
                             await interaction.editReply({ components: [] });
                             await user.save();
                         }
