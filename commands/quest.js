@@ -805,6 +805,7 @@ module.exports = {
         const reportFilter = (int) => {
             if (int.user.id === interaction.user.id) {
                 if (int.customId === "next") {
+                    int.deferUpdate();
                     return true;
                 }
                 else {
@@ -1012,8 +1013,8 @@ module.exports = {
 
                             }
                         }
-                        //add reward of this stage
                     }
+                    //add reward of this stage
                     rewards.push(stageRewards);
                     //create description
                     let description = { stage: combatStage, text: "", success: success };
@@ -1057,12 +1058,6 @@ module.exports = {
                 });
                 reportCollector.on('collect', async i => {
                     stageCounter++;
-                    try {
-                        i.deferUpdate();
-                    }
-                    catch (err) {
-                        console.error(`can't defer interaction at Report Collector\n${err}`);
-                    }
                     if (stageCounter <= embedReport.length) {
                         try {
                             await interaction.editReply({ embeds: embedReport[stageCounter - 1], components: [reportRow] });
