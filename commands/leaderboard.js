@@ -77,10 +77,10 @@ async function createEmbed(members, filterOption) {
                 if (legendary > 0) {
                     collectibleText += `, legendary: ${legendary}`;
                 }
-                if (uncommon + rare + epic + legendary === 0) {
-                    collectibleText = `no collectibles found yet`;
+                if (uncommon + rare + epic + legendary > 0) {
+                    memberFields.push({ name: `${name}`, value: `${collectibleText}` });
+                    //collectibleText = `no collectibles found yet`;
                 }
-                memberFields.push({ name: `${name}`, value: `${collectibleText}` });
             }
         }
         catch (err) {
@@ -133,7 +133,7 @@ module.exports = {
         const choice = interaction.options.getString('filter');
         if (!choice || choice === "xp") {
             //show leaderboard of all members based on xp
-            const allMembers = await User.find({ guild_id: interaction.guildId });
+            const allMembers = await User.find({ guild_id: interaction.guildId, 'unit.xp': { $gt: 0 } });
             if (allMembers.length === 0) {
                 await interaction.reply({ content: `No user found in that server!` });
                 return;
@@ -156,12 +156,12 @@ module.exports = {
                 collectibleMembers.sort((a, b) => {
                     let aCollectibles = 0;
                     let bCollectibles = 0;
-                    for (let item in a.inventory) {
+                    for (let item of a.inventory) {
                         if (item.item_type === "collectible") {
                             aCollectibles++;
                         }
                     }
-                    for (let item in b.inventory) {
+                    for (let item of b.inventory) {
                         if (item.item_type === "collectible") {
                             bCollectibles++;
                         }
