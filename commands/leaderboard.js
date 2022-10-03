@@ -156,12 +156,12 @@ module.exports = {
                 collectibleMembers.sort((a, b) => {
                     let aCollectibles = 0;
                     let bCollectibles = 0;
-                    for (let item in a.inventory) {
+                    for (let item of a.inventory) {
                         if (item.item_type === "collectible") {
                             aCollectibles++;
                         }
                     }
-                    for (let item in b.inventory) {
+                    for (let item of b.inventory) {
                         if (item.item_type === "collectible") {
                             bCollectibles++;
                         }
