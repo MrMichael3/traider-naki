@@ -19,7 +19,7 @@ const legendaryCollectibleChance = 0.2;
 const itemChance = 0.4;
 const soulstoneMultiplier = 500; // multiplier * duration/maxDuration * difficulty = base soulstone reward
 const xpMultiplier = 10; // multiplier^level = base xp reward
-const effectiveMultiplier = 1.5;
+const effectiveMultiplier = 1.2; // a effective unit has "x" higher attack
 
 
 function readableTime(ms) {
@@ -453,7 +453,7 @@ async function fightSimulator(user, enemy) {
             attack = Math.floor((Math.random() * (user.unit.max_attack - user.unit.min_attack) + user.unit.min_attack) * 100) / 100;
             if (playerEffective) {
                 //increase attack
-                attack = Math.floor(attack * effectiveMultiplier * 100) / 100;
+                attack = Math.floor(attack * (effectiveMultiplier + 0.3) * 100) / 100;
             }
             enemyHealth = Math.round(Math.max(enemyHealth - attack, 0));
             if (enemyHealth === 0) {
