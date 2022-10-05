@@ -870,16 +870,20 @@ module.exports = {
                     const chosenQuest = Number(i.customId);
                     try {
                         if (Number.isInteger(chosenQuest)) {
-                            questSelectionCollector.stop();
+                            if (chosenQuest >= user.quest.length) {
+                                console.log(`wrong quest id: ${chosenQuest}!`);
+                                return;
+                            }
+                            await questSelectionCollector.stop();
                             //delete the other quests
                             user.quest = [user.quest[chosenQuest]];
                             //set status and status time
                             user.status = "atQuest";
                             user.status_time = Date.now() + user.quest[0].duration * 1000;
                             //reply
+                            await user.save();
                             await i.reply({ content: `You have chosen the quest **'${user.quest[0].title}'**. Good luck on your quest!\n*Type '/quest' to see your progress and get rewarded after the quest finished.*` });
                             await interaction.editReply({ components: [] });
-                            await user.save();
                         }
                     }
                     catch (err) {

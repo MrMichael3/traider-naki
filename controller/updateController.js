@@ -73,6 +73,7 @@ async function statusTime(client) {
                     break;
                 case "atTraining":
                     const xpBefore = user.unit.xp;
+                    user.quest = [];
                     const xpReward = await trainingReward(user);
                     const userAfterReward = await User.findOne({ discord_id: user.discord_id, guild_id: user.guild_id }).exec();
 
