@@ -7,6 +7,7 @@ const client = new Client(
 );
 const User = require('./User');
 const Quest = require('./schemas/Quest');
+console.log("very first log at botmain.js");
 
 //create a .commands to store all commands
 client.commands = new Collection();
@@ -24,6 +25,7 @@ for (const file of commandFiles) {
 
 //command handler: create a file for new commands and run 'deploy-commands.js' 
 client.on('interactionCreate', async interaction => {
+	console.log("command handler");
 	if (!interaction.isCommand()) return;
 	const command = client.commands.get(interaction.commandName);
 	if (!command) return;
@@ -64,4 +66,6 @@ for (const file of eventFiles) {
 }
 
 // Authenticate
+console.log("botmain before login");
 client.login(process.env.DISCORD_TOKEN)
+console.log("botmain after login");
