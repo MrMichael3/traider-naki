@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Item = require('./../schemas/Item.js');
 const emojis = require('./../emojis.json');
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { EmbedBuilder, MessageActionRow, MessageButton } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 
 const itemsPerShopPage = 10; //how many items are displayed per page in shop
 
@@ -105,13 +105,13 @@ module.exports = {
 
             const backId = 'back'
             const forwardId = 'forward'
-            const backButton = new MessageButton({
+            const backButton = new ButtonBuilder({
                 style: ButtonStyle.Secondary,
                 label: 'Back',
                 emoji: '⬅️',
                 customId: backId
             });
-            const forwardButton = new MessageButton({
+            const forwardButton = new ButtonBuilder({
                 style: ButtonStyle.Secondary,
                 label: 'Forward',
                 emoji: '➡️',
@@ -124,7 +124,7 @@ module.exports = {
                 embeds: embedsList,
                 components: singleShopPage
                     ? []
-                    : [new MessageActionRow({ components: [forwardButton] })]
+                    : [new ActionRowBuilder({ components: [forwardButton] })]
             });
             if (singleShopPage) {
                 return;
@@ -158,7 +158,7 @@ module.exports = {
                     await i.update({
                         embeds: await createEmbeds(Math.max(currentIndex - 1, 0)),
                         components: [
-                            new MessageActionRow({
+                            new ActionRowBuilder({
                                 components: [
                                     // back button if it isn't the start
                                     ...(currentIndex ? [backButton] : []),
