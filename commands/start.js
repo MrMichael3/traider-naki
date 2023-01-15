@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const User = require('./../schemas/User.js');
 const mongoose = require('mongoose');
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { EmbedBuilder, MessageActionRow, MessageButton } = require('discord.js');
 const unitData = require('./../unitStats.json');
 const emojis = require('./../emojis.json');
 const druidNaki = unitData.starterUnits.find(x => x.id === 1);
@@ -16,7 +16,7 @@ function createEmbeds() {
     // TODO: Create forward/back buttons instead of 4 embeds
     const embeds = [];
     //druid Naki
-    const druidNakiEmbed = new MessageEmbed()
+    const druidNakiEmbed = new EmbedBuilder()
         //.setColor()
         .setTitle(`${druidNaki.name} Level 1`)
         .setDescription(druidNaki.description)
@@ -30,7 +30,7 @@ function createEmbeds() {
     embeds.push(druidNakiEmbed);
 
     //Guard Naki
-    const guardNakiEmbed = new MessageEmbed()
+    const guardNakiEmbed = new EmbedBuilder()
         //.setColor()
         .setTitle(`${guardNaki.name} Level 1`)
         .setDescription(guardNaki.description)
@@ -44,7 +44,7 @@ function createEmbeds() {
     embeds.push(guardNakiEmbed);
 
     //Forest Spirit
-    const forestSpiritEmbed = new MessageEmbed()
+    const forestSpiritEmbed = new EmbedBuilder()
         //.setColor()
         .setTitle(`${forestSpirit.name} Level 1`)
         .setDescription(forestSpirit.description)
@@ -58,7 +58,7 @@ function createEmbeds() {
     embeds.push(forestSpiritEmbed);
 
     //Elder Spirit
-    const elderSpiritEmbed = new MessageEmbed()
+    const elderSpiritEmbed = new EmbedBuilder()
         //.setColor()
         .setTitle(`${elderSpirit.name} Level 1`)
         .setDescription(elderSpirit.description)
@@ -125,23 +125,23 @@ module.exports = {
                         .setCustomId('druidNaki')
                         .setLabel('Druid Naki')
                         .setEmoji(emojis["unitDruidNaki"])
-                        .setStyle('SUCCESS'),
+                        .setStyle(ButtonStyle.Success),
 
                     new MessageButton()
                         .setCustomId('guardNaki')
                         .setLabel('Guard Naki')
                         .setEmoji(emojis["unitGuardNaki"])
-                        .setStyle('SUCCESS'),
+                        .setStyle(ButtonStyle.Success),
                     new MessageButton()
                         .setCustomId('forestSpirit')
                         .setLabel('Forest Spirit')
                         .setEmoji(emojis["unitForestSpirit"])
-                        .setStyle('SUCCESS'),
+                        .setStyle(ButtonStyle.Success),
                     new MessageButton()
                         .setCustomId('elderSpirit')
                         .setEmoji(emojis["unitElderSpirit"])
                         .setLabel('Elder Spirit')
-                        .setStyle('SUCCESS'),
+                        .setStyle(ButtonStyle.Success),
                 );
             await interaction.followUp({ embeds: embedsList, ephemeral: true, components: [row] });
 

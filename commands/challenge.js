@@ -65,15 +65,15 @@ module.exports = {
                 new MessageButton()
                     .setCustomId("100")
                     .setLabel(`100 ${emojis.soulstone}`)
-                    .setStyle('PRIMARY'),
+                    .setStyle(ButtonStyle.Primary),
                 new MessageButton()
                     .setCustomId("500")
                     .setLabel(`500 ${emojis.soulstone}`)
-                    .setStyle('PRIMARY'),
+                    .setStyle(ButtonStyle.Primary),
                 new MessageButton()
                     .setCustomId("1500")
                     .setLabel(`1500 ${emojis.soulstone}`)
-                    .setStyle('PRIMARY')
+                    .setStyle(ButtonStyle.Primary)
             );
         try {
             console.log(`challenger: ${interaction.user.id}\ntarget: ${interaction.options.get('player').user.id}`)
@@ -164,11 +164,11 @@ module.exports = {
                     new MessageButton()
                         .setCustomId(`acceptChallenge`)
                         .setLabel(`Yes`)
-                        .setStyle(`PRIMARY`),
+                        .setStyle(`ButtonStyle.Primary`),
                     new MessageButton()
                         .setCustomId(`denyChallenge`)
                         .setLabel(`No`)
-                        .setStyle(`PRIMARY`)
+                        .setStyle(`ButtonStyle.Primary`)
                 );
             try {
                 await i.editReply({ content: `**PVP CHALLENGE**\n<@${target.discord_id}> is challenged by ${challenger.username}. Do you want to accept the challenge and fight against ${challenger.username}?\n*You must be idle to accept the challenge*`, components: [challengeRow] });

@@ -88,12 +88,12 @@ module.exports = {
                     new MessageButton()
                         .setCustomId('endTraining')
                         .setLabel('YES')
-                        .setStyle('DANGER'),
+                        .setStyle(ButtonStyle.Danger),
 
                     new MessageButton()
                         .setCustomId('keepTraining')
                         .setLabel('NO')
-                        .setStyle('SECONDARY')
+                        .setStyle(ButtonStyle.Secondary)
                 );
             try {
                 await interaction.reply({

@@ -31,12 +31,12 @@ module.exports = {
                 new MessageButton()
                     .setCustomId('changeSetting')
                     .setLabel('YES')
-                    .setStyle('PRIMARY'),
+                    .setStyle(ButtonStyle.Primary),
 
                 new MessageButton()
                     .setCustomId('dontChangeSetting')
                     .setLabel('NO')
-                    .setStyle('PRIMARY')
+                    .setStyle(ButtonStyle.Primary)
             );
         await interaction.reply({ content: text, components: [row], ephemeral: true });
         //collector for button interaction

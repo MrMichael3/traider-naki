@@ -4,7 +4,7 @@ const Item = require('./../schemas/Item.js');
 const Quest = require('./../schemas/Quest.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const unitData = require('./../unitStats.json');
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { EmbedBuilder, MessageActionRow, MessageButton } = require('discord.js');
 const emojis = require('./../emojis.json');
 const { getUnitLevel, statsMultiplier, levelUp } = require('./../controller/unitLevel.js');
 const { isEffective } = require('../controller/fightController.js');
@@ -309,7 +309,7 @@ async function createSelectionEmbed(user) {
         }
     }
     //create embedded message
-    const selectionEmbed = new MessageEmbed()
+    const selectionEmbed = new EmbedBuilder()
         .setTitle(`Choose a Quest`)
         .setDescription(`You can choose between three quests of different difficulty (${emojis.battlepoint}) and duration.`)
         .addFields(
@@ -349,7 +349,7 @@ function createQuestReportEmbed(user, description, results, rewards, stage) {
         enemyTitle = `${enemyName} lv ${enemyLevel}`;
         enemyDescription = `Health: ${results.enemy.currentHealth}/${results.enemy.maxHealth}\nAttack: ${results.enemy.minAttack} - ${results.enemy.maxAttack}`;
     }
-    const reportEmbed = new MessageEmbed()
+    const reportEmbed = new EmbedBuilder()
         .setTitle(`Quest Report`)
         .setDescription(`${user.quest[0].title} ${diffStars}`)
         .addFields(
@@ -404,7 +404,7 @@ function createReportSummaryEmbed(user, rewards) {
         stageCounter++;
     }
     const embeds = [];
-    const summaryEmbed = new MessageEmbed()
+    const summaryEmbed = new EmbedBuilder()
         .setTitle(`Quest Report`)
         .setDescription(`${user.quest[0].title} ${diffStars}`)
         .addFields(
@@ -846,16 +846,16 @@ module.exports = {
                         new MessageButton()
                             .setCustomId("0")
                             .setLabel(`${user.quest[0].title}`)
-                            .setStyle('SUCCESS'),
+                            .setStyle(ButtonStyle.Success),
 
                         new MessageButton()
                             .setCustomId("1")
                             .setLabel(`${user.quest[1].title}`)
-                            .setStyle('SUCCESS'),
+                            .setStyle(ButtonStyle.Success),
                         new MessageButton()
                             .setCustomId("2")
                             .setLabel(`${user.quest[2].title}`)
-                            .setStyle('SUCCESS'),
+                            .setStyle(ButtonStyle.Success),
                     );
                 //create selection embedded message
                 const embed = await createSelectionEmbed(user);
@@ -1060,7 +1060,7 @@ module.exports = {
                         new MessageButton()
                             .setCustomId('next')
                             .setLabel('➡️')
-                            .setStyle('SUCCESS')
+                            .setStyle(ButtonStyle.Success)
                     );
 
                 await interaction.reply({ embeds: embedReport[stageCounter - 1], components: [reportRow] });

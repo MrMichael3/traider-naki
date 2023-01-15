@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const User = require('./../schemas/User.js');
 const Item = require('./../schemas/Item.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { MessageActionRow, MessageButton } = require('discord.js');
 const { getUnitLevel } = require('./../controller/unitLevel.js');
 const emojis = require(`./../emojis.json`);
 
@@ -24,12 +24,12 @@ module.exports = {
                 new MessageButton()
                     .setCustomId('delete')
                     .setLabel('YES')
-                    .setStyle('DANGER'),
+                    .setStyle(ButtonStyle.Danger),
 
                 new MessageButton()
                     .setCustomId('stay')
                     .setLabel('NO')
-                    .setStyle('SECONDARY')
+                    .setStyle(ButtonStyle.Secondary)
             );
         await interaction.reply({
             content: `**Do you really want to delete your progress?**\nYour unit, inventory and soulstones will get deleted!`,

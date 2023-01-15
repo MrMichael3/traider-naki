@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const Item = require('./../schemas/Item.js');
 const emojis = require('./../emojis.json');
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageEmbed, MessageActionRow, MessageButton } = require('discord.js');
+const { EmbedBuilder, MessageActionRow, MessageButton } = require('discord.js');
 
 const itemsPerShopPage = 10; //how many items are displayed per page in shop
 
@@ -53,7 +53,7 @@ async function createEmbeds(start = 0) {
         availableItems = availableItems.concat(collectibleItems);
     }
     const currentPage = availableItems.slice(start, start + itemsPerShopPage - 1);
-    const shopEmbed = new MessageEmbed()
+    const shopEmbed = new EmbedBuilder()
         .setTitle(`Traider Naki's Shop`)
         .setThumbnail(thumbnail)
         .setDescription(`*Spend your Soulstones on consumables and other items. \n Use '/shop [item]' to get more information and '/buy [item]' to buy an item.*`)
@@ -66,7 +66,7 @@ function createItemEmbeds(item) {
     // An embed message with details of selected item
     const embeds = [];
     var itemType = item.item_type;
-    const itemEmbed = new MessageEmbed()
+    const itemEmbed = new EmbedBuilder()
         .setTitle(`${item.name}`)
         .setDescription(`${item.description_long}`)
         .setThumbnail(item.image)
@@ -106,13 +106,13 @@ module.exports = {
             const backId = 'back'
             const forwardId = 'forward'
             const backButton = new MessageButton({
-                style: 'SECONDARY',
+                style: ButtonStyle.Secondary,
                 label: 'Back',
                 emoji: '⬅️',
                 customId: backId
             });
             const forwardButton = new MessageButton({
-                style: 'SECONDARY',
+                style: ButtonStyle.Secondary,
                 label: 'Forward',
                 emoji: '➡️',
                 customId: forwardId
