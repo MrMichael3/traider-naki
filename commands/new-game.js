@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const User = require('./../schemas/User.js');
 const Item = require('./../schemas/Item.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageActionRow, MessageButton } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const { getUnitLevel } = require('./../controller/unitLevel.js');
 const emojis = require(`./../emojis.json`);
 

@@ -1,7 +1,7 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const User = require('./../schemas/User.js');
 const mongoose = require('mongoose');
-const { EmbedBuilder, MessageActionRow, MessageButton } = require('discord.js');
+const { EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const unitData = require('./../unitStats.json');
 const emojis = require('./../emojis.json');
 const druidNaki = unitData.starterUnits.find(x => x.id === 1);
