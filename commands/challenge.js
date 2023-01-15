@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageActionRow, MessageButton } = require('discord.js');
-const User = require('./../User.js');
+const User = require('./../schemas/User.js');
 const emojis = require('./../emojis.json');
 
 const targetFilter = (int) => {

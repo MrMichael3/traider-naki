@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const User = require('./User.js');
+const User = require('./schemas/User.js');
 const unitStats = require('./unitStats.json');
 
 function getUnitStats(u) {

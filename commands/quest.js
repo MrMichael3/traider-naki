@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const User = require('./../User.js');
+const User = require('./../schemas/User.js');
 const Item = require('./../schemas/Item.js');
 const Quest = require('./../schemas/Quest.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');

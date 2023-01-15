@@ -1,4 +1,4 @@
-const User = require('./../User.js');
+const User = require('./../schemas/User.js');
 const Item = require('./../schemas/Item.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageEmbed } = require('discord.js');

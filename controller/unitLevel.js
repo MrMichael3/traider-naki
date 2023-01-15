@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const User = require('./../User.js');
 const unitStats = require('./../unitStats.json');
 const { MessageEmbed } = require('discord.js');
 const emojis = require('./../emojis.json');

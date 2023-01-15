@@ -1,4 +1,4 @@
-const User = require('./../User.js');
+const User = require('./../schemas/User.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { getUnitLevel, levelUp } = require('./../controller/unitLevel.js');
 const maxStreak = 30; //days until streak bonus is at max

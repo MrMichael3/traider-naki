@@ -1,7 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { Permissions } = require('discord.js');
 const Guild = require('./../schemas/Guild.js');
-
+const { ApplicationCommandType, ApplicationCommandOptionType, ChannelType } = require('discord.js');
 
 
 module.exports = {
@@ -19,7 +18,7 @@ module.exports = {
     async execute(interaction) {
 
         let channel = interaction.options.getChannel('channel');
-        if (channel.type != "GUILD_TEXT") {
+        if ( channel.type != ChannelType.GuildText) {
             await interaction.reply({ content: `You can't use the channel #${channel.name}, chose a text channel instead.` });
             return;
         }

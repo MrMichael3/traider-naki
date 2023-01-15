@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const User = require('./../User.js');
+const User = require('./../schemas/User.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const unitStats = require('./../unitStats.json');
 const { MessageEmbed } = require('discord.js');

@@ -1,6 +1,6 @@
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const { MessageActionRow, MessageButton } = require('discord.js');
-const User = require('./../User.js');
+const User = require('./../schemas/User.js');
 const mongoose = require('mongoose');
 const { getUnitLevel, levelUp } = require('./../controller/unitLevel.js');
 

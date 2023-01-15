@@ -1,13 +1,11 @@
 require('dotenv').config();
 const fs = require('node:fs');
 const path = require('node:path');
-const { Client, Collection, Intents } = require('discord.js');
+const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
 const client = new Client(
-	{ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES] }
+	{ intents: [GatewayIntentBits.Guilds], partials: [Partials.Channel] }
 );
-const User = require('./User');
-const Quest = require('./schemas/Quest');
-console.log("very first log at botmain.js");
+const User = require('./schemas/User');
 
 //create a .commands to store all commands
 client.commands = new Collection();

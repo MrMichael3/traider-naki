@@ -1,4 +1,4 @@
-const User = require('./../User.js');
+const User = require('./../schemas/User.js');
 const Guild = require('./../schemas/Guild.js');
 const Item = require('./../schemas/Item.js');
 const { trainingReward } = require('./../commands/training.js');

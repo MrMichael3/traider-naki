@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const User = require('./../User.js');
+const User = require('./../schemas/User.js');
 
 const deleteUser = async (userId, guildId) => {
     //delete user by discord id
