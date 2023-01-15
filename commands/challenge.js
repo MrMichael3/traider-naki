@@ -60,17 +60,17 @@ module.exports = {
             console.error(err);
             return;
         }
-        const row = new MessageActionRow()
+        const row = new ActionRowBuilder()
             .addComponents(
-                new MessageButton()
+                new ButtonBuilder()
                     .setCustomId("100")
                     .setLabel(`100 ${emojis.soulstone}`)
                     .setStyle(ButtonStyle.Primary),
-                new MessageButton()
+                new ButtonBuilder()
                     .setCustomId("500")
                     .setLabel(`500 ${emojis.soulstone}`)
                     .setStyle(ButtonStyle.Primary),
-                new MessageButton()
+                new ButtonBuilder()
                     .setCustomId("1500")
                     .setLabel(`1500 ${emojis.soulstone}`)
                     .setStyle(ButtonStyle.Primary)
@@ -159,13 +159,13 @@ module.exports = {
                 }
                 return;
             }
-            const challengeRow = new MessageActionRow()
+            const challengeRow = new ActionRowBuilder()
                 .addComponents(
-                    new MessageButton()
+                    new ButtonBuilder()
                         .setCustomId(`acceptChallenge`)
                         .setLabel(`Yes`)
                         .setStyle(`ButtonStyle.Primary`),
-                    new MessageButton()
+                    new ButtonBuilder()
                         .setCustomId(`denyChallenge`)
                         .setLabel(`No`)
                         .setStyle(`ButtonStyle.Primary`)

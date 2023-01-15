@@ -83,14 +83,14 @@ module.exports = {
                 }
                 return;
             }
-            const row = new MessageActionRow()
+            const row = new ActionRowBuilder()
                 .addComponents(
-                    new MessageButton()
+                    new ButtonBuilder()
                         .setCustomId('endTraining')
                         .setLabel('YES')
                         .setStyle(ButtonStyle.Danger),
 
-                    new MessageButton()
+                    new ButtonBuilder()
                         .setCustomId('keepTraining')
                         .setLabel('NO')
                         .setStyle(ButtonStyle.Secondary)

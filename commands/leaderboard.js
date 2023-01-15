@@ -1,7 +1,7 @@
 const User = require('./../schemas/User.js');
 const Item = require('./../schemas/Item.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const { getUnitLevel, xpOfLevel } = require('./../controller/unitLevel.js');
 
 async function createEmbed(members, filterOption) {
@@ -107,7 +107,7 @@ async function createEmbed(members, filterOption) {
     else if (filterOption === "collectible") {
         title = "Leaderboard of collectibles"
     }
-    const leaderboardEmbed = new MessageEmbed()
+    const leaderboardEmbed = new EmbedBuilder()
         .setTitle(title)
         .addFields(memberFields);
     embeds.push(leaderboardEmbed);

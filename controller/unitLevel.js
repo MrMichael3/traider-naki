@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const unitStats = require('./../unitStats.json');
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const emojis = require('./../emojis.json');
 
 const baseXp = 350 //xp for level 0;
@@ -17,7 +17,7 @@ function createEmbeds(userBefore, userAfter) {
     const levelBefore = getUnitLevel(userBefore.xp);
     const levelAfter = getUnitLevel(userAfter.unit.xp);
     const username = userAfter.username.slice(0, userAfter.username.indexOf('#'));
-    const unitStats = new MessageEmbed()
+    const unitStats = new EmbedBuilder()
         .setTitle(`Level Up!`)
         .setThumbnail("https://c.tenor.com/VaLGhMfFcecAAAAi/emir-mekan-gi%CC%87f.gif")
         .setDescription(`<@${userAfter.discord_id}> the ${unitName}`)

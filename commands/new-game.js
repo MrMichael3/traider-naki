@@ -19,14 +19,14 @@ module.exports = {
             return;
         }
         //delete user
-        const row = new MessageActionRow()
+        const row = new ActionRowBuilder()
             .addComponents(
-                new MessageButton()
+                new ButtonBuilder()
                     .setCustomId('delete')
                     .setLabel('YES')
                     .setStyle(ButtonStyle.Danger),
 
-                new MessageButton()
+                new ButtonBuilder()
                     .setCustomId('stay')
                     .setLabel('NO')
                     .setStyle(ButtonStyle.Secondary)

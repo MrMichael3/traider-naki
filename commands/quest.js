@@ -841,18 +841,18 @@ module.exports = {
                     await user.save();
                     user = await User.findOne({ discord_id: interaction.user.id, guild_id: interaction.guildId });
                 }
-                const row = new MessageActionRow()
+                const row = new ActionRowBuilder()
                     .addComponents(
-                        new MessageButton()
+                        new ButtonBuilder()
                             .setCustomId("0")
                             .setLabel(`${user.quest[0].title}`)
                             .setStyle(ButtonStyle.Success),
 
-                        new MessageButton()
+                        new ButtonBuilder()
                             .setCustomId("1")
                             .setLabel(`${user.quest[1].title}`)
                             .setStyle(ButtonStyle.Success),
-                        new MessageButton()
+                        new ButtonBuilder()
                             .setCustomId("2")
                             .setLabel(`${user.quest[2].title}`)
                             .setStyle(ButtonStyle.Success),
@@ -1055,9 +1055,9 @@ module.exports = {
 
                 //send reply
                 let stageCounter = 1;
-                const reportRow = new MessageActionRow()
+                const reportRow = new ActionRowBuilder()
                     .addComponents(
-                        new MessageButton()
+                        new ButtonBuilder()
                             .setCustomId('next')
                             .setLabel('➡️')
                             .setStyle(ButtonStyle.Success)

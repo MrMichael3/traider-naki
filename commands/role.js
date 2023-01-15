@@ -26,14 +26,14 @@ module.exports = {
             text = `Currently, the bot won't give roles to the members. Do you want to enable the **Expelsia** role?`;
         }
         //reply
-        const row = new MessageActionRow()
+        const row = new ActionRowBuilder()
             .addComponents(
-                new MessageButton()
+                new ButtonBuilder()
                     .setCustomId('changeSetting')
                     .setLabel('YES')
                     .setStyle(ButtonStyle.Primary),
 
-                new MessageButton()
+                new ButtonBuilder()
                     .setCustomId('dontChangeSetting')
                     .setLabel('NO')
                     .setStyle(ButtonStyle.Primary)

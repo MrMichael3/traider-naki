@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const User = require('./../schemas/User.js');
 const Item = require('./../schemas/Item.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const { getUnitLevel } = require('./../controller/unitLevel.js');
 const emojis = require(`./../emojis.json`);
 
@@ -87,7 +87,7 @@ module.exports = {
         ];
 
         //create Embed
-        const inventoryEmbed = new MessageEmbed()
+        const inventoryEmbed = new EmbedBuilder()
             .setTitle(`${user.username.slice(0, user.username.indexOf('#'))}, the ${beautifyUnitName(user.unit.unit_type)}, Level ${getUnitLevel(user.unit.xp)}`)
             .setDescription(`${emojis.soulstone}${user.soulstones} Soulstones`)
             .addFields(itemsList);

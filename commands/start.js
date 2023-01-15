@@ -119,25 +119,25 @@ module.exports = {
             await interaction.reply({
                 content: `Hello <@${interaction.user.id}> \n This is the beginning of your journey in Expelsia! First, chose your origin. You can chose between four units, but chose wisely, as this can't be changed afterwards. Read the information about the units first before you chose. \n In Expelsia you have to stand up to wild creatures as well as to other players.`
             });
-            const row = new MessageActionRow()
+            const row = new ActionRowBuilder()
                 .addComponents(
-                    new MessageButton()
+                    new ButtonBuilder()
                         .setCustomId('druidNaki')
                         .setLabel('Druid Naki')
                         .setEmoji(emojis["unitDruidNaki"])
                         .setStyle(ButtonStyle.Success),
 
-                    new MessageButton()
+                    new ButtonBuilder()
                         .setCustomId('guardNaki')
                         .setLabel('Guard Naki')
                         .setEmoji(emojis["unitGuardNaki"])
                         .setStyle(ButtonStyle.Success),
-                    new MessageButton()
+                    new ButtonBuilder()
                         .setCustomId('forestSpirit')
                         .setLabel('Forest Spirit')
                         .setEmoji(emojis["unitForestSpirit"])
                         .setStyle(ButtonStyle.Success),
-                    new MessageButton()
+                    new ButtonBuilder()
                         .setCustomId('elderSpirit')
                         .setEmoji(emojis["unitElderSpirit"])
                         .setLabel('Elder Spirit')

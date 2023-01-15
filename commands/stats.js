@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const User = require('./../schemas/User.js');
 const { SlashCommandBuilder } = require('@discordjs/builders');
 const unitStats = require('./../unitStats.json');
-const { MessageEmbed } = require('discord.js');
+const { EmbedBuilder } = require('discord.js');
 const emojis = require('./../emojis.json');
 const { getUnitLevel, xpOfLevel } = require('./../controller/unitLevel.js');
 const { findUnitIconsById } = require('./start.js');
@@ -49,7 +49,7 @@ function createEmbeds(user) {
 	if (l.includes(user.status)) {
 		statusWithTime += ` (${readableTime(user.status_time - Date.now())})`;
 	}
-	const unitStatsEmbed = new MessageEmbed()
+	const unitStatsEmbed = new EmbedBuilder()
 		.setTitle(`${userName}, ${unitName} Level ${unitLevel}`)
 		.setThumbnail(thumbnail)
 		.setDescription(`*${unitStats.starterUnits.find(x => x.id === unitId).description}* \n ${progressbar.filledBar(maxXp - prevMaxXp, user.unit.xp - prevMaxXp)[0]} \n XP: ${user.unit.xp - prevMaxXp}/${maxXp - prevMaxXp}`)
